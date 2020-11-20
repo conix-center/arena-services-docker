@@ -97,8 +97,10 @@ server {
     location / {
         root /usr/share/nginx/html;
         index index.html index.htm index.nginx-debian.html;
-        add_header Access-Control-Allow-Origin "*";
-        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, DELETE, PUT';
+        try_files ${ESC}uri ${ESC}uri/ /index.html;
+
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
         add_header 'Access-Control-Allow-Credentials' 'true';
         add_header 'Access-Control-Allow-Headers' 'User-Agent,Keep-Alive,Content-Type';
 
@@ -107,9 +109,6 @@ server {
             add_header 'Cache-Control' 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0';
         }
     }
-
-    # define error page
-    error_page 404 =200 /index.html;
 }
 
 server {

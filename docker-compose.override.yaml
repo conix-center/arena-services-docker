@@ -10,10 +10,10 @@ version: '3'
 services:
 
   arena-web: # create a container named "arena-web"; other service containers in this file can resolve its name (arena-web)
-    image: "nginx" # creates container from nginx
+    image: "nginx" # builds container from arena-persist Dockerfile 
     volumes:
-      - ./conf/arena-web-dev.conf:/etc/nginx/conf.d/arena-web-dev.conf # mount local nginx dev config
-      - ./ARENA-core:/usr/share/nginx/html # mount root html from ./ARENA-core
+      - ./conf/arena-web-dev.conf:/etc/nginx/conf.d/arena-web.conf # mount nginx config      
+      - ./ARENA-core:/usr/share/nginx/html # set arena client code defaults
       - ./conf/arena-defaults-dev.js:/usr/share/nginx/html/defaults.js # set arena client code defaults
       - ./data/certbot/conf:/etc/letsencrypt # mount certbot files (used in conf/nginx-conf.d/arena-web.conf)
       - ./data/certbot/www:/var/www/certbot # mount certbot files (used in conf/nginx-conf.d/arena-web.conf)
@@ -30,14 +30,6 @@ services:
       - arts
       - arena-auth
       - arena-account
-
-  certbot:
-    image: certbot/certbot
-    restart: unless-stopped
-    volumes:
-      - ./data/certbot/conf:/etc/letsencrypt # mount certbot files; certificate files will be here
-      - ./data/certbot/www:/var/www/certbot # mount certbot files;
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'" # check for certificate updates every 12h
 
   mongodb:
     image: mongo # pull from https://hub.docker.com/_/mongo/
@@ -98,26 +90,6 @@ services:
       - ./conf/arena-store-config.json:/arena-store/.config.json
       - ./ARENA-core/store:/srv-files
       - ./data/arena-store:/arena-store/data
-
-  arts:
-    build: "arts/arts-main"
-    volumes:
-      - ./conf/arts-settings.py:/usr/src/app/arts_api/settings.py
-      - arts-static-content:/usr/src/app/public # static arts visualization page
-    env_file: secret.env
-    ports:
-      - "8001:8000"
-    working_dir: /usr/src/app
-    command: "python manage.py runserver 0.0.0.0:8000"
-    depends_on:
-      - mqtt
-
-  py-runtime:
-    build: "arena-runtime-simulated"
-    volumes:
-      - ./conf/arena-runtime-simulated.conf:/usr/src/app/config.json
-    depends_on:
-      - arts
 
 volumes:
   arts-static-content:

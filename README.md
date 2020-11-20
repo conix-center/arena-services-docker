@@ -17,7 +17,7 @@ Nginx and mosquitto are configured with TLS/SSL using certificates created by ce
 
 ## Quick Setup
 
-1. We need [docker](https://docs.docker.com/get-docker/),  [docker-compose](https://docs.docker.com/compose/install/), [curl](https://curl.haxx.se/download.html), [envsubst](https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html), [base64](https://linux.die.net/man/1/base64) installed. The [init](init.sh) script needs a bash shell. See [Dependencies](dependencies-assumptions) section for details.
+1. We need [docker](https://docs.docker.com/get-docker/),  [docker-compose](https://docs.docker.com/compose/install/), [curl](https://curl.haxx.se/download.html), [envsubst](https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html), [base64](https://linux.die.net/man/1/base64) installed. The [init](init.sh) script needs a bash shell. See [Dependencies](#dependenciesassumptions) section for details.
 
 2. Clone this repo (with ```--recurse-submodules``` to make sure you get the contents of the repositories added as submodules):
 
@@ -43,7 +43,7 @@ GAUTH_CLIENTID="Google_OAuth_Client_ID"
 ACCOUNT_ADMIN_NAME="admin"
 ACCOUNT_ADMIN_EMAIL="admin@example.com"
 ```
-* ```HOSTNAME``` is the fully qualified domain name (FQDN) of your host. If you don't have a FQDN, you can do a localhost setup; see [Init Config](init-config).
+* ```HOSTNAME``` is the fully qualified domain name (FQDN) of your host. If you don't have a FQDN, you can do a localhost setup; see [Init Config](#init-config).
 * ```EMAIL``` is the email used to get the certificates with [letsencrypt](https://letsencrypt.org/).
 * ```BACKUP_USER``` is the ```user:group``` of the *host machine user* that needs to access the files backed up.
 * ```ACCOUNT_SU_NAME``` and ```ACCOUNT_SU_EMAIL``` are the account admin user and email.
@@ -64,10 +64,10 @@ ACCOUNT_ADMIN_EMAIL="admin@example.com"
 ```
 
 * You might need to execute ```sudo``` (e.g. ```sudo ./prod.sh up```) if your user does not have permissions to access the docker service.
-* For more details, see [Init Config](init-config) Section below.
-* We also have configurations for development and staging. See the [utility scripts Section](utility-scripts)
+* For more details, see [Init Config](#init-config) Section below.
+* We also have configurations for development and staging. See the [utility scripts Section](#utility-scripts)
 
-4. Open the file store management interface and change the default admin password (**user**:admin;**pass**:admin). To open the file store, point to ```/storemng``` (e.g. ```https://arena.andrew.cmu.edu/storemng```) in your browser. See details in the [File Store](file-store) Section below.
+4. Open the file store management interface and change the default admin password (**user**:admin;**pass**:admin). To open the file store, point to ```/storemng``` (e.g. ```https://arena.andrew.cmu.edu/storemng```) in your browser. See details in the [File Store](#file-store) Section below.
 
 ## Dependencies/Assumptions
 
@@ -100,7 +100,7 @@ Before starting services, we need to create the configuration files for the serv
 > ```bash
 > HOSTNAME="localhost"
 > ```
-> This will result in creating a self-signed certificate to be used with the services.
+> This will result in creating a self-signed certificate to be used with the services. This is the name you will enter in your browser: [https://localhost](https:///localhost)
 
 2. Run the init script:
 
@@ -116,21 +116,21 @@ The init script will generate configuration files (from the templates in [conf/t
 
 - For production:
 ```bash
-  docker-compose -f docker-compose.yaml -f docker-compose.prod.yaml up -d
+  ./prod.sh up -d
 ```
 
 - For staging (adds a dev folder on thw webserver):
 ```bash
-  docker-compose -f docker-compose.yaml -f docker-compose.prod.yaml -f docker-compose.staging.yaml up -d
+ ./staging.sh up -d
 ```
 
 - For development (no monitoring/backups):
 ```bash
- docker-compose up -d
+ ./dev.sh up -d
 ```
 
 * Note: you might need to execute the above commands with ```sudo``` if your user does not have permissions to access the docker service.
-* Instead of the above commands, you can use the ```prod.sh```, ```dev.sh``` and  ```staging.sh``` [utility scripts](utility-scripts).
+* See [utility scripts](utility-scripts) for details.
 
 ## File Store
 
@@ -150,17 +150,12 @@ After updating the submodules, to have the updates of built containers (persist,
 
 - For production:
 ```bash
-docker-compose -f docker-compose.yaml -f docker-compose.prod.yaml down; docker-compose -f docker-compose.yaml -f docker-compose.prod.yaml up -d --force-build
+[./prod.sh | ./staging.sh | ./dev.sh] up -d --force-recreate --build
 ```
 
-- For development:
-```bash
-docker-compose down; docker-compose up -d --force-build
-```
-
+* Use ```prod.sh```, ```staging.sh``` or ```dev.sh``` depending on which configuration you want to use.
 * Note: you might need to execute the above commands with ```sudo``` if your user does not have permissions to access the docker service.
-
-*  See [Compose Quick Reference](compose-quick-reference) for the description of these commands.
+* See [utility scripts](utility-scripts) for the description of these commands.
 
 ## Files/Folders Description
 
@@ -185,7 +180,7 @@ docker-compose down; docker-compose up -d --force-build
 * **init.sh:** Initialize config files. See [Init Config](init-config) Section.
 * **update-submodules.sh:** Run this to get the latest updates from the repositories added as submodules (**ARENA-core**, **arena-persist**). You will need to restart the services to have the changes live (see [Update Submodules](update-submodules)).
 
-## Utility scripts
+## Utility Scripts
 
 You can use the ```prod.sh```, ```dev.sh``` and  ```staging.sh``` utility scripts. These scripts call ```docker-compose``` with the right compose config files as follows:
 * ```prod.sh```: ```docker-compose.yaml``` and ```docker-compose.prod.yaml```
@@ -197,30 +192,32 @@ Call the script by passing any ```docker-compose``` subcommands (such as ```up``
 * ```./prod.sh down```
 * ```./dev.sh up```
 
-## Compose Quick Reference
+**NOTE**: *You might need to execute the scripts with ```sudo``` if your user does not have permissions to access the docker service*.
 
-**NOTE**: By default, docker-compose will use the configuration in [docker-compose.override.yaml](docker-compose.override.yaml). To start the production config, you need to indicate ```-f docker-compose.yaml -f docker-compose.prod.yaml```. See details about using multiple configuration files in the [docker the documentation](https://docs.docker.com/compose/extends/). *You might need to execute the docker commands with ```sudo``` if your user does not have permissions to access the docker service*.
+### Script Arguments Quick Reference
+
+The utility scripts pass the arguments to **docker-compose**, so you can use them with all normal [**docker-compose** subcommands](https://docs.docker.com/compose/reference/). Here is a quick reference of a few of the most used subcommands.
 
 **Start services and see their output/logs**
 
-- ```docker-compose up``` (add ```--force-build  ``` to build containers after updating submodules)
+- ```[/prod.sh | d/ev.sh | ./staging.sh] up``` (add ```--force-recreate --build``` to recreate abd build containers; usefull after updating code in submodules)
 
 **Start the services in "detached" (daemon) mode (-d)**
 
-- ```docker-compose up -d``` (add ```--force-recreate  ``` to recreate containers after updating submodules)
+- ```[/prod.sh | d/ev.sh | ./staging.sh] up -d``` (add ```--force-recreate  --build``` to recreate abd build containers)
 
 **Start just a particular service**
 
-- ```docker-compose start <service name in docker-compose.yaml>```
+- ```[/prod.sh | d/ev.sh | ./staging.sh] up <service name in docker-compose*.yaml>```
 
 **Stop services**
 
-- ```docker-compose down```
+- ```[/prod.sh | d/ev.sh | ./staging.sh] down```
 
-**Restart the services**
+**Start a particular service**
 
-- ```docker-compose restart```
+- ```[/prod.sh | d/ev.sh | ./staging.sh] stop <service name in docker-compose*.yaml>```
 
 **See logs**
 
-- ```docker-compose logs```
+- ```[/prod.sh | d/ev.sh | ./staging.sh] logs```
