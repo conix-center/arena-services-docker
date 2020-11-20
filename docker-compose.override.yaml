@@ -28,6 +28,8 @@ services:
       - arena-persist
       - store
       - arts
+      - arena-auth
+      - arena-account
 
   certbot:
     image: certbot/certbot

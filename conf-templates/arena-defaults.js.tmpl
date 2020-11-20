@@ -1,4 +1,5 @@
 const defaults = {
+     realm: "realm",
      updateMillis:100,
      scenenameParam:"render",
      userParam:"X",
@@ -15,6 +16,6 @@ const defaults = {
      mqttPath:["/mqtt/", "/mqtt1/", "/mqtt2/"],
      persistHost:"${HOSTNAME}",
      persistPath:"/persist/",
-     urlMqttAuth:"https://${HOSTNAME}:8888",
+     urlMqttAuth:"https://${HOSTNAME}/user/mqtt_auth",
      gAuthClientId:'${GAUTH_CLIENTID}'
 };
