@@ -36,15 +36,6 @@ services:
       - mongodb
       - mqtt
 
-  arena-auth:
-    build: "ARENA-auth" # builds container from arena-persist Dockerfile
-    user: "root"
-    volumes:
-      - ./conf/auth-config.json:/home/node/app/config.json # mount updated config.json that uses indicates right paths and secret
-      - ./data/certbot/conf:/etc/letsencrypt
-    command: "node index.js -c ./config.json"
-    restart: unless-stopped
-
   arena-account:
     build: "arena-account" # builds container from arena-account Dockerfile
     env_file: secret.env

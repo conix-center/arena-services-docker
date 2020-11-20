@@ -11,7 +11,7 @@ Creates several containers with ARENA services:
 * File Store
 * Certbot
 
-Source repositories (such as ARENA-core, ARENA-auth, arena-persist) are submodules of this repo. Containers are created from these files. ARENA-core is served by the nginx container.
+Source repositories (such as ARENA-core, arena-account, arena-persist) are submodules of this repo. Containers are created from these files. ARENA-core is served by the nginx container.
 
 Nginx and mosquitto are configured with TLS/SSL using certificates created by certbot (running as a service in a container), which will periodically attempt to renew the certificates. On the first execution, the configuration files must be initialized by running **init.sh**.
 
@@ -162,7 +162,7 @@ After updating the submodules, to have the updates of built containers (persist,
 * **ARENA-core:**	Contents of the ARENA-core repository (submodule).
 * **arena-persist:**	Contents of the arena-persist repository (submodule).
 * **arena-runtime-simulated:**	Contents of the arena-runtime-simulated repository (submodule).
-* **ARENA-auth:**	Contents of the ARENA-auth repository (submodule).
+* **arena-account:**	Contents of the arena-account repository (submodule).
 * **arts:**	Contents of the arts repository (submodule).
 * **conf:** Configuration files for the services (e.g. certificates, mosquito, nginx, persistence). These files are generated at init time (by ```init.sh```), using the files in the **conf-templates** folder.
 * **conf-templates:** Templates of the configuration files for the services.Some important files described below:
