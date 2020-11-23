@@ -1,15 +1,147 @@
 # this is the staging docker compose; add dev folders in arena web
 #
 # run staging:
-#    docker-compose -f docker-compose.yaml -f docker-compose.prod.yaml -f docker-compose.staging.yaml up -d
+#    docker-compose -f docker-compose.yaml -f docker-compose.staging.yaml up -d
 #
 # NOTE: if -f is not given, 'docker-compose up' will use docker-compose.override.yaml (https://docs.docker.com/compose/extends/)
-
 version: '3'
 
 services:
 
   arena-web: # create a container named "arena-web"; other service containers in this file can resolve its name (arena-web)
+    image: "nginx" # creates container from nginx
     volumes:
-      - ../dev:/usr/share/nginx/html/dev # mount dev folder
-      - ../dev/mqtt-west:/usr/share/nginx/html/mqtt-west # mount mqtt-west folder
+      - ./conf/arena-web-staging.conf:/etc/nginx/conf.d/arena-web.conf:ro # mount nginx config
+      - ./ARENA-core:/usr/share/nginx/html:ro # mount root html from ./ARENA-core
+      - ./conf/arena-defaults.js:/usr/share/nginx/html/defaults.js:ro # set arena client code defaults
+      - arts-static-content:/usr/share/nginx/html/arts:ro # serve arts static files
+      - account-static-content:/usr/share/nginx/html/user/static:ro # serve account static files
+      - ../dev:/usr/share/nginx/html/dev:ro # mount dev folder
+      - ../dev/mqtt-west:/usr/share/nginx/html/mqtt-west:ro # mount mqtt-west folder
+    ports:
+      - "80:80" # map port 80 on the host to port 80 on the container
+      - "443:443"
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'" # reload certificates every 6h
+    restart: unless-stopped # service will respawn unless we tell docker to stop it
+
+  certbot:
+    image: certbot/certbot
+    restart: unless-stopped
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt:rw # mount certbot files; certificate files will be here
+      - ./data/certbot/www:/var/www/certbot:rw # mount certbot files;
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'" # check for certificate updates every 12h
+
+  mongodb:
+    restart: unless-stopped
+
+  arena-persist:
+    restart: unless-stopped
+
+  arena-auth:
+    ports:
+      - 8888:8888/tcp
+    restart: unless-stopped
+
+  arena-account:
+    volumes:
+      - ./conf/arena-account-settings.py:/usr/src/app/arena_account/settings.py:ro
+      - account-static-content:/usr/src/app/static:ro # static content
+      - ./data/account/db.sqlite3:/usr/src/app/db.sqlite3:rw # account db
+    env_file:
+      - .env
+      - secret.env
+    restart: unless-stopped
+
+  mqtt:
+    ports:
+      - 1883:1883/tcp # mqtt; map port for listener configured in /conf/mosquitto.conf
+      - 9001:9001/tcp # mqtt-ws
+      - 8083:8083/tcp # mqtt-wss
+      - 8883:8883/tcp # mqtt-tls
+    restart: unless-stopped
+
+  mqtt-br1:
+    image: conixcenter/arena-broker # pulls from https://hub.docker.com/repository/docker/conixcenter/arena-broker
+    volumes:
+      - ./conf/mosquitto-br-conn.conf:/mosquitto/config/mosquitto.conf:ro # mount local config file to /mosquitto/config/mosquitto.conf in the container
+      - ./data/certbot/conf:/etc/letsencrypt:ro # mount certs volume (see conf/mosquitto.conf to see how the files are used)
+    env_file: secret.env
+    restart: unless-stopped
+
+  mqtt-br2:
+    image: conixcenter/arena-broker # pulls from https://hub.docker.com/repository/docker/conixcenter/arena-broker
+    volumes:
+      - ./conf/mosquitto-br-conn.conf:/mosquitto/config/mosquitto.conf:ro # mount local config file to /mosquitto/config/mosquitto.conf in the container
+      - ./data/certbot/conf:/etc/letsencrypt:ro # mount certs volume (see conf/mosquitto.conf to see how the files are used)
+    env_file: secret.env
+    restart: unless-stopped
+
+  store:
+    image: "conixcenter/arena-store"  # pulls from https://hub.docker.com/repository/docker/conixcenter/arena-store
+    volumes:
+      - ./conf/arena-store-config.json:/arena-store/.config.json:ro
+      - ./ARENA-core/store:/srv-files:rw
+      - ./data/arena-store:/arena-store/data:rw
+    restart: unless-stopped # service will respawn unless we tell docker to stop it
+
+  arts:
+    volumes:
+      - arts-static-content:/usr/src/app/public:ro # static arts visualization page
+    restart: unless-stopped # service will respawn unless we tell docker to stop it
+
+  py-runtime:
+    restart: unless-stopped # service will respawn unless we tell docker to stop it
+
+  cadvisor:
+    image: gcr.io/google-containers/cadvisor:latest
+    ports:
+      - 8080:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    restart: unless-stopped # service will respawn unless we tell docker to stop it
+
+  arena-host-stats:
+    image: prom/node-exporter:latest
+    restart: unless-stopped # service will respawn unless we tell docker to stop it
+
+  prometheus:
+    image: prom/prometheus:latest
+    user: "root"
+    volumes:
+      - ./conf/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./data/prometheus/:/prometheus/
+    command: [ "--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus", "--storage.tsdb.retention.time=30d" ]
+    restart: unless-stopped # service will respawn unless we tell docker to stop it
+
+  grafana:
+    image: grafana/grafana:latest
+    user: "root"
+    ports:
+      - 3000:3000
+    volumes:
+      - ./data/grafana:/var/lib/grafana:rw
+    restart: unless-stopped # service will respawn unless we tell docker to stop it
+
+  restarter:
+    image: docker
+    volumes: 
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+    command: [ "/bin/sh", "-c", "while true; do sleep 12h; docker restart py-runtime; done" ]
+    restart: unless-stopped
+
+  backup:
+    image: docker
+    user: root
+    volumes:
+      - ./data:/data:rw
+      - ./mongo-backup:/backup:rw
+    command: ["/bin/sh", "-c", "while true; do cp -avr /data/mongodb /backup; chown -R $BACKUP_USER /backup; sleep 12h; done"]
+    restart: unless-stopped
+
+volumes:
+  arts-static-content:
+  account-static-content:

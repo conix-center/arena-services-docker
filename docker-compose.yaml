@@ -14,6 +14,10 @@ services:
 
   arena-web: # create a container named "arena-web"; other service containers in this file can resolve its name (arena-web)
     image: "nginx" # creates container from nginx
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt:ro # mount certbot files (used in conf/nginx-conf.d/arena-web.conf)
+      - ./data/certbot/www:/var/www/certbot:ro # mount certbot files (used in conf/nginx-conf.d/arena-web.conf)
+
     depends_on:
       - mqtt
       - arena-persist
@@ -24,13 +28,14 @@ services:
   mongodb:
     image: mongo # pull from https://hub.docker.com/_/mongo/
     volumes:
-      - ./data/mongodb:/data/db # permanent storage on the host
+      - ./data/mongodb:/data/db:rw # permanent storage on the host
 
   arena-persist:
     build: "arena-persist" # builds container from arena-persist Dockerfile
     user: "node"
     volumes:
-      - ./conf/persist-config.json:/home/node/app/config.json # mount updated config.json that uses the container name
+      - ./conf/persist-config.json:/home/node/app/config.json:ro # mount updated config.json that uses the container name
+      - ./data/keys/pubsubkey.pub:/home/node/app/pubsubkey.pub:ro # pubsub public key available to persist
     command: "npm run start"
     depends_on:
       - mongodb
@@ -44,14 +49,14 @@ services:
   mqtt:
     image: conixcenter/arena-broker # pulls from https://hub.docker.com/repository/docker/conixcenter/arena-broker
     volumes:
-      - ./conf/mosquitto.conf:/mosquitto/config/mosquitto.conf # mount local config file to /mosquitto/config/mosquitto.conf in the container
-      - ./data/certbot/conf:/etc/letsencrypt # mount certs volume (see conf/mosquitto.conf to see how the files are used)
+      - ./conf/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro # mount local config file to /mosquitto/config/mosquitto.conf in the container
+      - ./data/certbot/conf:/etc/letsencrypt:ro # mount certs volume (see conf/mosquitto.conf to see how the files are used)
     env_file: secret.env
 
   arts:
     build: "arts/arts-main"
     volumes:
-      - ./conf/arts-settings.py:/usr/src/app/arts_api/settings.py
+      - ./conf/arts-settings.py:/usr/src/app/arts_api/settings.py:ro
     env_file: secret.env
     command: "python manage.py runserver 0.0.0.0:8000"
     depends_on:
@@ -60,6 +65,6 @@ services:
   py-runtime:
     build: "arena-runtime-simulated"
     volumes:
-      - ./conf/arena-runtime-simulated.conf:/usr/src/app/config.json
+      - ./conf/arena-runtime-simulated.conf:/usr/src/app/config.json:ro
     depends_on:
       - arts

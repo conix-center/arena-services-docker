@@ -10,15 +10,16 @@ version: '3'
 services:
 
   arena-web: # create a container named "arena-web"; other service containers in this file can resolve its name (arena-web)
-    image: "nginx" # builds container from arena-persist Dockerfile 
+    image: "nginx" # builds container from arena-persist Dockerfile
     volumes:
-      - ./conf/arena-web-dev.conf:/etc/nginx/conf.d/arena-web.conf # mount nginx config      
-      - ./ARENA-core:/usr/share/nginx/html # set arena client code defaults
-      - ./conf/arena-defaults-dev.js:/usr/share/nginx/html/defaults.js # set arena client code defaults
-      - ./data/certbot/conf:/etc/letsencrypt # mount certbot files (used in conf/nginx-conf.d/arena-web.conf)
-      - ./data/certbot/www:/var/www/certbot # mount certbot files (used in conf/nginx-conf.d/arena-web.conf)
-      - arts-static-content:/usr/share/nginx/html/arts # serve arts static files
-      - account-static-content:/usr/share/nginx/html/user/static # serve account static files
+      - ./conf/arena-web-dev.conf:/etc/nginx/conf.d/arena-web.conf:ro # mount nginx config
+      - ./ARENA-core:/usr/share/nginx/html:ro # set arena client code defaults
+      - ./conf/arena-defaults-dev.js:/usr/share/nginx/html/defaults.js:ro # set arena client code defaults
+      - ./data/keys//pubsubkey.pub:/usr/share/nginx/html/pubsubkey.pub:ro # pubsub public key available on the server
+      - ./data/certbot/conf:/etc/letsencrypt:ro # mount certbot files (used in conf/nginx-conf.d/arena-web.conf)
+      - ./data/certbot/www:/var/www/certbot:ro # mount certbot files (used in conf/nginx-conf.d/arena-web.conf)
+      - arts-static-content:/usr/share/nginx/html/arts:ro # serve arts static files
+      - account-static-content:/usr/share/nginx/html/user/static:ro # serve account static files
     ports:
       - "80:80" # map port 80 on the host to port 80 on the container
       - "443:443"
@@ -32,7 +33,7 @@ services:
   mongodb:
     image: mongo # pull from https://hub.docker.com/_/mongo/
     volumes:
-      - ./data/mongodb:/data/db # permanent storage on the host
+      - ./data/mongodb:/data/db:rw # permanent storage on the host
 
   arena-persist:
     build: "arena-persist" # builds container from arena-persist Dockerfile
@@ -40,7 +41,8 @@ services:
     ports:
       - 8884:8884/tcp
     volumes:
-      - ./conf/persist-config.json:/home/node/app/config.json # mount updated config.json that uses the container name
+      - ./conf/persist-config.json:/home/node/app/config.json:ro # mount updated config.json that uses the container name
+      - ./data/keys/pubsubkey.pub:/home/node/app/pubsubkey.pub:ro # pubsub public key available to persist
     working_dir: /home/node/app
     command: "npm run start"
     depends_on:
@@ -50,9 +52,9 @@ services:
   arena-account:
     build: "arena-account" # builds container from arena-account Dockerfile
     volumes:
-      - ./conf/arena-account-settings.py:/usr/src/app/arena_account/settings.py
-      - account-static-content:/usr/src/app/static # static content
-      - ./data/account/db.sqlite3:/usr/src/app/db.sqlite3 # account db
+      - ./conf/arena-account-settings.py:/usr/src/app/arena_account/settings.py:ro
+      - account-static-content:/usr/src/app/static:ro # static content
+      - ./data/account/db.sqlite3:/usr/src/app/db.sqlite3:rw # account db
     env_file:
       - .env
       - secret.env
@@ -63,8 +65,8 @@ services:
   mqtt:
     image: conixcenter/arena-broker # pulls from https://hub.docker.com/repository/docker/conixcenter/arena-broker
     volumes:
-      - ./conf/mosquitto.conf:/mosquitto/config/mosquitto.conf # mount local config file to /mosquitto/config/mosquitto.conf in the container
-      - ./data/certbot/conf:/etc/letsencrypt # mount certs volume (see conf/mosquitto.conf to see how the files are used)
+      - ./conf/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro # mount local config file to /mosquitto/config/mosquitto.conf in the container
+      - ./data/certbot/conf:/etc/letsencrypt:ro # mount certs volume (see conf/mosquitto.conf to see how the files are used)
     env_file: secret.env
     ports:
       - 1883:1883/tcp # mqtt; map port for listener configured in /conf/mosquitto.conf
@@ -75,9 +77,9 @@ services:
   store:
     image: "conixcenter/arena-store"  # pulls from https://hub.docker.com/repository/docker/conixcenter/arena-store
     volumes:
-      - ./conf/arena-store-config.json:/arena-store/.config.json
-      - ./ARENA-core/store:/srv-files
-      - ./data/arena-store:/arena-store/data
+      - ./conf/arena-store-config.json:/arena-store/.config.json:ro
+      - ./ARENA-core/store:/srv-files:rw
+      - ./data/arena-store:/arena-store/data:rw
 
 volumes:
   arts-static-content:

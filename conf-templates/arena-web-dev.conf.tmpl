@@ -51,6 +51,8 @@ server {
         proxy_read_timeout 86400;
     }
 
+
+
     location ^~ /storemng/ {
         proxy_pass http://store:8080/;
         proxy_http_version 1.1;
@@ -63,6 +65,7 @@ server {
         root /usr/share/nginx/html;
         index index.html index.htm index.nginx-debian.html;
         try_files ${ESC}uri ${ESC}uri/ /index.html;
+        disable_symlinks off;
 
         add_header 'Access-Control-Allow-Origin' '*';
         add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
@@ -73,6 +76,15 @@ server {
             expires -1;
             add_header 'Cache-Control' 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0';
         }
+
+        location ^~ /store/users/ {    
+            autoindex on;
+        }
+
+        location ^~ /dev/ {    
+            autoindex on;
+        }
+
     }
 }
 

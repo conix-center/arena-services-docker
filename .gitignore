@@ -1,4 +1,7 @@
-.env
+pubsubkey*
+*der
+*pem
+*env
 conf/*
 environment.env
 data/

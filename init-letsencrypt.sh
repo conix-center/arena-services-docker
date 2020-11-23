@@ -1,50 +1,38 @@
 #!/bin/bash
 
-# https://medium.com/@pentacent/nginx-and-lets-encrypt-with-docker-in-less-than-5-minutes-b4b8a60d3a71
-# https://github.com/wmnnd/nginx-certbot
-
-source .env
-
-domains=($HOSTNAME)
+domains=$HOSTNAME
 rsa_key_size=4096
-data_path="./data/certbot"
 email=$EMAIL # Adding a valid address is strongly recommended
-staging=0 # Set to 1 if you're testing your setup to avoid hitting request limits
+staging_arg="" # Set to "--staging" if you're testing your setup to avoid hitting request limits
 
-if [ -d "$data_path"/conf ]; then
-  read -p "Existing data found. Continue and replace existing certificate? (y/N) " decision
+if [ -d "/etc/letsencrypt/conf" ]; then
+  read -p "Existing data found. Continue and replace existing letsencrypt files? (y/N) " decision
   if [ "$decision" != "Y" ] && [ "$decision" != "y" ]; then
     exit
   fi
+  rm -fr /etc/letsencrypt/conf
 fi
 
-if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] || [ ! -e "$data_path/conf/ssl-dhparams.pem" ]; then
-  echo "### Downloading recommended TLS parameters ..."
-  mkdir -p "$data_path/conf"
-  curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf > "$data_path/conf/options-ssl-nginx.conf"
-  curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbot/ssl-dhparams.pem > "$data_path/conf/ssl-dhparams.pem"
-  echo
-fi
+echo "### Downloading recommended TLS parameters ..."
+mkdir -p "/etc/letsencrypt/conf"
+curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf > "/etc/letsencrypt/conf/options-ssl-nginx.conf"
+curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbot/ssl-dhparams.pem > "/etc/letsencrypt/conf/ssl-dhparams.pem"
 
-# if setting up a "localhost" domain, just create a self-signed certificate
-if [ $domains == "localhost" ]; then
+local="${domains##*.}"
+# if setting up a "localhost" or ".local" domain, just create a self-signed certificate
+if [ $domains = "localhost" ] || [ $local = "local" ]; then
   echo "### Creating self-signed certificate for $domains"
   path="/etc/letsencrypt/live/$domains"
-  mkdir -p "$data_path/conf/live/$domains"
-  docker-compose -f docker-compose.letsencrypt.yaml run --rm --entrypoint "\
-    openssl req -x509 -nodes -newkey rsa:2048\
-      -keyout '$path/privkey.pem' \
-      -out '$path/fullchain.pem' \
-      -subj '/CN=localhost'" certbot
+  mkdir -p $path
+  openssl req -x509 -nodes -newkey rsa:$rsa_key_size\
+      -keyout "$path/privkey.pem" \
+      -out "$path/fullchain.pem" \
+      -subj "/CN=$domains"
   exit 0
 fi
 
-echo "### Starting nginx ..."
-docker-compose -f docker-compose.letsencrypt.yaml up --force-recreate -d nginx
-echo
-
 echo "### Requesting Let's Encrypt certificate for $domains ..."
-#Join $domains to -d args
+# Join $domains to -d args
 domain_args=""
 for domain in "${domains[@]}"; do
   domain_args="$domain_args -d $domain"
@@ -56,17 +44,13 @@ case "$email" in
   *) email_arg="--email $email" ;;
 esac
 
-# Enable staging mode if needed
-if [ $staging != "0" ]; then staging_arg="--staging"; fi
-
-docker-compose -f docker-compose.letsencrypt.yaml run --rm --entrypoint "\
-  certbot certonly --webroot -w /var/www/certbot \
+certbot certonly --standalone -w /var/www/certbot \
     $staging_arg \
     $email_arg \
     $domain_args \
     --rsa-key-size $rsa_key_size \
     --agree-tos \
-    --force-renewal" certbot
+    --force-renewal
 
 if [ $? -ne 0 ]
 then
@@ -74,14 +58,11 @@ then
   echo "### !!! Could not create certificate. Certbot failed (see errors above) !!! ###"
   echo "### !!! Creating self-signed certificate for $domains !!! ###"
   path="/etc/letsencrypt/live/$domains"
-  mkdir -p "$data_path/conf/live/$domains"
-  docker-compose -f docker-compose.letsencrypt.yaml run --rm --entrypoint "\
-    openssl req -x509 -nodes -newkey rsa:2048\
-      -keyout '$path/privkey.pem' \
-      -out '$path/fullchain.pem' \
-      -subj '/CN=localhost'" certbot
+  mkdir -p $path
+  openssl req -x509 -nodes -newkey rsa:$rsa_key_size\
+      -keyout "$path/privkey.pem" \
+      -out "$path/fullchain.pem" \
+      -subj "/CN=$domains"
+  exit 0
 fi
 echo
-
-echo "### Stopping services ..."
-docker-compose -f docker-compose.letsencrypt.yaml down
