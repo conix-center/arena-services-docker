@@ -11,7 +11,7 @@ services:
   arena-web: # create a container named "arena-web"; other service containers in this file can resolve its name (arena-web)
     image: "nginx" # creates container from nginx
     volumes:
-      - ./conf/arena-web-staging.conf:/etc/nginx/conf.d/arena-web.conf:ro # mount nginx config
+      - ./conf/arena-web-staging.conf:/etc/nginx/conf.d/arena-web-staging.conf:ro # mount nginx config
       - ./ARENA-core:/usr/share/nginx/html:ro # mount root html from ./ARENA-core
       - ./conf/arena-defaults.js:/usr/share/nginx/html/defaults.js:ro # set arena client code defaults
       - arts-static-content:/usr/share/nginx/html/arts:ro # serve arts static files
@@ -47,7 +47,7 @@ services:
     volumes:
       - ./conf/arena-account-settings.py:/usr/src/app/arena_account/settings.py:ro
       - account-static-content:/usr/src/app/static:ro # static content
-      - ./data/account/db.sqlite3:/usr/src/app/db.sqlite3:rw # account db
+      - ./data/account:/usr/src/app/db # account db
     env_file:
       - .env
       - secret.env

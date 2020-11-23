@@ -15,7 +15,6 @@ services:
       - ./conf/arena-web-dev.conf:/etc/nginx/conf.d/arena-web.conf:ro # mount nginx config
       - ./ARENA-core:/usr/share/nginx/html:ro # set arena client code defaults
       - ./conf/arena-defaults-dev.js:/usr/share/nginx/html/defaults.js:ro # set arena client code defaults
-      - ./data/keys//pubsubkey.pub:/usr/share/nginx/html/pubsubkey.pub:ro # pubsub public key available on the server
       - ./data/certbot/conf:/etc/letsencrypt:ro # mount certbot files (used in conf/nginx-conf.d/arena-web.conf)
       - ./data/certbot/www:/var/www/certbot:ro # mount certbot files (used in conf/nginx-conf.d/arena-web.conf)
       - arts-static-content:/usr/share/nginx/html/arts:ro # serve arts static files
@@ -54,7 +53,7 @@ services:
     volumes:
       - ./conf/arena-account-settings.py:/usr/src/app/arena_account/settings.py:ro
       - account-static-content:/usr/src/app/static:ro # static content
-      - ./data/account/db.sqlite3:/usr/src/app/db.sqlite3:rw # account db
+      - ./data/account:/usr/src/app/db # account db
     env_file:
       - .env
       - secret.env

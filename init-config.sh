@@ -14,13 +14,13 @@ done
 echo -e "\n### Creating secret.env (with secret keys, admin password). This will replace old secret.env (if exists; backup will be in secret.env.bak)."
 read -p "Create secret.env ? (y/N) " -r
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-  SECRET_KEY=$(LC_ALL=C tr -dc '[:alnum:]' < /dev/urandom | head -c40)
-  SECRET_KEY_BASE64=$(echo $SECRET_KEY | base64)
-  ACCOUNT_SU_PASSWORD=$(LC_ALL=C tr -dc '[:alnum:]' < /dev/urandom | head -c15)
+  export SECRET_KEY=$(LC_ALL=C tr -dc '[:alnum:]' < /dev/urandom | head -c40)
+  export SECRET_KEY_BASE64=$(echo $SECRET_KEY | base64)
+  export DJANGO_SUPERUSER_PASSWORD=$(LC_ALL=C tr -dc '[:alnum:]' < /dev/urandom | head -c15)
   cp secret.env secret.env.bak
   echo "SECRET_KEY="$SECRET_KEY > secret.env
   echo "SECRET_KEY_BASE64="$SECRET_KEY_BASE64 >> secret.env
-  echo "ACCOUNT_ADMIN_PASSWORD="$ACCOUNT_SU_PASSWORD >> secret.env
+  echo "DJANGO_SUPERUSER_PASSWORD="$DJANGO_SUPERUSER_PASSWORD >> secret.env
 
   chown $OWNER secret.env # change ownership of file created
 fi
@@ -47,9 +47,6 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     echo "Stopped."
     exit 0
 fi
-
-# make sure account db file exists
-touch data/account/db.sqlite3 
 
 # setup escape var for envsubst templates
 export ESC="$"
