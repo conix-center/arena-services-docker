@@ -17,7 +17,6 @@ services:
       - ./conf/arena-defaults-dev.js:/usr/share/nginx/html/defaults.js:ro # set arena client code defaults
       - ./data/certbot/conf:/etc/letsencrypt:ro # mount certbot files (used in conf/nginx-conf.d/arena-web.conf)
       - ./data/certbot/www:/var/www/certbot:ro # mount certbot files (used in conf/nginx-conf.d/arena-web.conf)
-      - arts-static-content:/usr/share/nginx/html/arts:ro # serve arts static files
       - account-static-content:/usr/share/nginx/html/user/static:ro # serve account static files
     ports:
       - "80:80" # map port 80 on the host to port 80 on the container
@@ -81,5 +80,4 @@ services:
       - ./data/arena-store:/arena-store/data:rw
 
 volumes:
-  arts-static-content:
   account-static-content:
