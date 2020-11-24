@@ -12,7 +12,7 @@ done
 [ ! -d conf ] && mkdir conf && chown $OWNER conf
 
 echo -e "\n### Creating secret.env (with secret keys, admin password). This will replace old secret.env (if exists; backup will be in secret.env.bak)."
-read -p "Create secret.env ? (y/N) " -r
+[ ! -f "secret.env" ] && read -p "Create secret.env ? (y/N) " -r
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   export SECRET_KEY=$(LC_ALL=C tr -dc '[:alnum:]' < /dev/urandom | head -c40)
   export SECRET_KEY_BASE64=$(echo $SECRET_KEY | base64)

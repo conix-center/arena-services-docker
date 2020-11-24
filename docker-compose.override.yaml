@@ -51,7 +51,7 @@ services:
     build: "arena-account" # builds container from arena-account Dockerfile
     volumes:
       - ./conf/arena-account-settings.py:/usr/src/app/arena_account/settings.py:ro
-      - account-static-content:/usr/src/app/static:ro # static content
+      - account-static-content:/usr/src/app/static # static content
       - ./data/account:/usr/src/app/db # account db
     env_file:
       - .env
