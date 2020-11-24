@@ -38,11 +38,6 @@ services:
   arena-persist:
     restart: unless-stopped
 
-  arena-auth:
-    ports:
-      - 8888:8888/tcp
-    restart: unless-stopped
-
   arena-account:
     volumes:
       - ./conf/arena-account-settings.py:/usr/src/app/arena_account/settings.py:ro
@@ -128,7 +123,7 @@ services:
 
   restarter:
     image: docker
-    volumes: 
+    volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw
     command: [ "/bin/sh", "-c", "while true; do sleep 12h; docker restart py-runtime; done" ]
     restart: unless-stopped
