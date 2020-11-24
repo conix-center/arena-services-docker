@@ -59,7 +59,7 @@ server {
     }
 
     location ^~ /user/static/ {
-      root /usr/share/nginx/html/;
+      alias /usr/share/nginx/account-static/;
     }
 
     location ^~ /user/ {
@@ -110,10 +110,10 @@ server {
             add_header 'Cache-Control' 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0';
         }
 
-        location ^~ /store/users/ {    
+        location ^~ /store/users/ {
             autoindex on;
-        }  
-                   
+        }
+
     }
 }
 

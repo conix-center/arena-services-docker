@@ -5,18 +5,18 @@ rsa_key_size=4096
 email=$EMAIL # Adding a valid address is strongly recommended
 staging_arg="" # Set to "--staging" if you're testing your setup to avoid hitting request limits
 
-if [ -d "/etc/letsencrypt/conf" ]; then
+if [ -d "/etc/letsencrypt/live" ]; then
   read -p "Existing data found. Continue and replace existing letsencrypt files? (y/N) " decision
   if [ "$decision" != "Y" ] && [ "$decision" != "y" ]; then
     exit
   fi
-  rm -fr /etc/letsencrypt/conf
+  rm -fr /etc/letsencrypt/live
 fi
 
 echo "### Downloading recommended TLS parameters ..."
-mkdir -p "/etc/letsencrypt/conf"
-curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf > "/etc/letsencrypt/conf/options-ssl-nginx.conf"
-curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbot/ssl-dhparams.pem > "/etc/letsencrypt/conf/ssl-dhparams.pem"
+mkdir -p "/etc/letsencrypt"
+curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf > "/etc/letsencrypt/options-ssl-nginx.conf"
+curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbot/ssl-dhparams.pem > "/etc/letsencrypt/ssl-dhparams.pem"
 
 local="${domains##*.}"
 # if setting up a "localhost" or ".local" domain, just create a self-signed certificate

@@ -2,7 +2,7 @@
 
 echo -e "\n### Creating data folders\n"
 data_folders=( "data/arena-store" "data/grafana"  "data/mongodb"  "data/prometheus" "data/account" "data/keys")
-[ ! -d "$d" ] && mkdir data 
+[ ! -d "$d" ] && mkdir data
 for d in "${data_folders[@]}"
 do
   echo $d
@@ -12,7 +12,7 @@ done
 [ ! -d conf ] && mkdir conf && chown $OWNER conf
 
 echo -e "\n### Creating secret.env (with secret keys, admin password). This will replace old secret.env (if exists; backup will be in secret.env.bak)."
-[ ! -f "secret.env" ] && read -p "Create secret.env ? (y/N) " -r
+read -p "Create secret.env ? (y/N) " -r
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   export SECRET_KEY=$(LC_ALL=C tr -dc '[:alnum:]' < /dev/urandom | head -c40)
   export SECRET_KEY_BASE64=$(echo $SECRET_KEY | base64)
@@ -30,7 +30,7 @@ read -p "Create RSA key pair ? (y/N) " -r
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   openssl genrsa -out ./data/keys/pubsubkey.pem 4096
   openssl rsa -in ./data/keys/pubsubkey.pem -RSAPublicKey_out -outform pem -out ./data/keys/pubsubkey.pub
-  openssl rsa -in ./data/keys/pubsubkey.pem -RSAPublicKey_out -outform DER -out ./data/keys/pubsubkey.der 
+  openssl rsa -in ./data/keys/pubsubkey.pem -RSAPublicKey_out -outform DER -out ./data/keys/pubsubkey.der
 
   # generate service tokens
   export PERSIST_JWT=$(python /utils/genjwt.py -k ./data/keys/pubsubkey.pem arena-persist)
@@ -60,4 +60,3 @@ do
   envsubst < conf-templates/$t > conf/$f
   chown $OWNER conf/$f
 done
-
