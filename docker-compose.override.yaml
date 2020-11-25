@@ -54,6 +54,7 @@ services:
       - 8888:8888/tcp
     volumes:
       - ./conf/auth-config.json:/home/node/app/config.json:ro # mount updated config.json that uses indicates right paths and secret
+      - ./data/keys/pubsubkey.pem:/home/node/app/pubsubkey.pem:ro # pubsub private key available to auth
       - ./data/certbot/conf:/etc/letsencrypt:ro
     command: "node index.js -c ./config.json"
 
