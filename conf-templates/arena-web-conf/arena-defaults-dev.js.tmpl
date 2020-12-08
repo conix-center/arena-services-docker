@@ -12,9 +12,12 @@ const defaults = {
      ATLASurl:"//atlas.conix.io",
      screenSharePath:"screenshare",
      vioTopic:"/topic/vio/",
-     graphTopic:"$NETWORK/latency",
+     graphTopic:"${ESC}NETWORK",
+     latencyTopic:"${ESC}NETWORK/latency",
      mqttPath:["/mqtt/"],
      persistHost:"${HOSTNAME}",
      persistPath:"/persist/",
-     gAuthClientId:'${GAUTH_CLIENTID}'
+     urlMqttAuth:"https://${HOSTNAME}/auth/",
+     gAuthClientId:'${GAUTH_CLIENTID}',
+     supportDevFolders:true
 };

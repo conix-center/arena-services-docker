@@ -14,7 +14,7 @@ services:
     volumes:
       - ./conf/arena-web.conf:/etc/nginx/conf.d/arena-web.conf:ro # mount nginx config
       - ./ARENA-core:/usr/share/nginx/html:ro # mount root html from ./ARENA-core
-      - ./conf/arena-defaults.js:/usr/share/nginx/html/defaults.js:ro # set arena client code defaults
+      - ./conf/arena-web-conf:/usr/share/nginx/html/conf # arena client code conf
       - arts-static-content:/usr/share/nginx/html/arts:ro # serve arts static files
       - account-static-content:/usr/share/nginx/html/user/static:ro # serve account static files
     ports:
@@ -35,6 +35,9 @@ services:
     restart: unless-stopped
 
   arena-persist:
+    restart: unless-stopped
+
+  arena-auth:
     restart: unless-stopped
 
   arena-account:
@@ -122,18 +125,9 @@ services:
 
   restarter:
     image: docker
-    volumes: 
+    volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw
     command: [ "/bin/sh", "-c", "while true; do sleep 12h; docker restart py-runtime; done" ]
-    restart: unless-stopped
-
-  backup:
-    image: docker
-    user: root
-    volumes:
-      - ./data:/data:rw
-      - ./mongo-backup:/backup:rw
-    command: ["/bin/sh", "-c", "while true; do cp -avr /data/mongodb /backup; chown -R $BACKUP_USER /backup; sleep 12h; done"]
     restart: unless-stopped
 
 volumes:

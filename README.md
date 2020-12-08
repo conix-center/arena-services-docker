@@ -27,20 +27,24 @@ git clone git@github.com:conix-center/arena-services-docker.git --recurse-submod
 
 3. Modify configuration:
 
-- Edit hostname and email addresses in [.env](.env). This should reflect your setup.
+- Edit hostname and email addresses in [init.env](init.env). This should reflect your setup.
 
 ```bash
 HOSTNAME=full.domain.name.of.your.host
 EMAIL=nouser@nomail.com
 BACKUP_USER=1001:1001
-GAUTH_CLIENTID=Google_OAuth_Client_ID
-ACCOUNT_ADMIN_NAME=admin
-ACCOUNT_ADMIN_EMAIL=admin@example.com
+GAUTH_CLIENTID=Google_OAuth_Web_Client_ID
+GAUTH_CLIENTSECRET=Google_OAuth_Web_Client_Secret
+GAUTH_INSTALLED_CLIENTID=Google_OAuth_Installed_Client_ID
+GAUTH_INSTALLED_CLIENTSECRET=Google_OAuth_Installed_Client_Secret
+DJANGO_SUPERUSER_USERNAME=admin
+DJANGO_SUPERUSER_EMAIL=admin@example.com
 ```
 * ```HOSTNAME``` is the fully qualified domain name (FQDN) of your host. If you don't have a FQDN, you can do a local setup; see [Init Config](#init-config).
 * ```EMAIL``` is the email used to get the certificates with [letsencrypt](https://letsencrypt.org/).
 * ```BACKUP_USER``` is the ```user:group``` of the *host machine user* that needs to access files backed up by the backup container.
 * ```ACCOUNT_SU_NAME``` and ```ACCOUNT_SU_EMAIL``` are the account admin user and email.
+* * Note: The file ```init.env``` is used only the first time you run ```init.sh```; its contents are copied to ```.env``` after the first run, and ```.env``` is the file used at runtime.
 
 4. Run init script:
 
@@ -82,17 +86,18 @@ Before starting services, we need to create the configuration files for the serv
 
 1. Modify configuration:
 
-- Edit hostname, email address and backup user (```user:group``` of the *host machine user* that needs to access the files backed up by the backup container configured in [docker-compose.prod.yaml](docker-compose.prod.yaml)) in the file [.env](.env). This should reflect your setup.
+- Edit hostname, email address and backup user (```user:group``` of the *host machine user* that needs to access the files backed up by the backup container configured in [docker-compose.prod.yaml](docker-compose.prod.yaml)) in the file [init.env](init.env). This should reflect your setup.
 - Insert the [Google Auth Client ID for your setup](https://developers.google.com/identity/protocols/oauth2/web-server).
 > ### Local setup
 >
-> If you want a local setup (usually for development), you can configure ```HOSTNAME``` in the file ```.env``` to a name that resolves locally on your machine (our script recognizes ```localhost```, or ```*.local``` as a local name):
+> If you want a local setup (usually for development), you can configure ```HOSTNAME``` in the file ```init.env``` to a name that resolves locally on your machine (our script recognizes ```localhost```, or ```*.local``` as a local name):
 >
 > ```bash
-> HOSTNAME=arena.local
+> HOSTNAME=localhost
 > ```
-> This will result in creating a self-signed certificate to be used with the services. This is the name you will enter in your browser: [https://arena.local](https:///arena.local)
+> This will result in creating a self-signed certificate to be used with the services. This is the name you will enter in your browser: [https://localhost](https:///localhost)
 > **Make sure the above name resolves in your system (by adding it to [the ```hosts file```](https://linuxize.com/post/how-to-edit-your-hosts-file/))**.
+> * Note: The file ```init.env``` is used only the first time you run ```init.sh```; its contents are copied to ```.env``` after the first run, and ```.env``` is the file used at runtime.
 
 2. Run the init script:
 
@@ -100,9 +105,10 @@ Before starting services, we need to create the configuration files for the serv
  ./init.sh
 ```
 
-The init script will generate configuration files (from the templates in [conf/templates](conf/templates)) for the services using the hostname and email configured in [.env](.env), and attempt to create certificates using letsencrypt. **If letsencrypt fails, it will create a self-signed certificate that can be used for testing purposes**.
+The init script will generate configuration files (from the templates in [conf/templates](conf/templates)) for the services using the hostname and email configured in [init.env](init.env), and attempt to create certificates using letsencrypt. **If letsencrypt fails, it will create a self-signed certificate that can be used for testing purposes**.
 
 * Note: you might need to execute ```sudo  docker-compose up -d``` if [your user does not have permissions to access the docker service](https://docs.docker.com/engine/install/linux-postinstall/).
+* Note: The file ```init.env``` is used only the first time you run ```init.sh```; its contents are copied to ```.env``` after the first run, and ```.env``` is the file used at runtime.
 
 3. Start all services:
 

@@ -182,8 +182,8 @@ JWT_AUTH = {
 # pubsub settings
 PUBSUB = {
     'mqtt_server': { 'host': '${HOSTNAME}', 'port': 1883, 'ws_port': 9001, 'wss_port': 8083 },
-    'mqtt_username': None,
-    'mqtt_password': None,
+    'mqtt_username': 'arena_arts',
+    'mqtt_password': '${SERVICE_ARENA_ARTS_JWT}',
     'subscribe_topics': [
         { 'name': 'reg', 'topic': 'realm/proc/reg', 'on_message': 'on_reg_message'},
         { 'name': 'ctl', 'topic': 'realm/proc/control', 'on_message': 'on_ctl_message' },

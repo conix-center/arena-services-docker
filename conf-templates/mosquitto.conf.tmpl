@@ -44,7 +44,7 @@ keyfile /etc/letsencrypt/live/${HOSTNAME}/privkey.pem
 
 #log_dest stdout
 #log_dest file /mosquitto/log/mosquitto.log
-#log_type all
+log_type all
 #websockets_log_level 255
 #connection_messages true
 #log_timestamp true
@@ -73,6 +73,10 @@ persistence false
 # mosquitto-jwt-auth plugin
 # -----------------------------------------------------------------
 
-#auth_plugin /usr/lib/libmosquitto_jwt_auth.so
+auth_plugin /usr/lib/libmosquitto_jwt_auth.so
 #auth_opt_jwt_alg HS256
+auth_opt_jwt_alg RS256
 #auth_opt_jwt_sec_env SECRET_KEY_BASE64
+auth_opt_jwt_sec_file /pubsubkey.der
+auth_opt_jwt_validate_exp true
+auth_opt_jwt_validate_sub_match_username true

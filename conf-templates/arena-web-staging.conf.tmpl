@@ -52,7 +52,18 @@ server {
         add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, DELETE, PUT';
         add_header 'Access-Control-Allow-Credentials' 'true';
         add_header 'Access-Control-Allow-Headers' 'User-Agent,Keep-Alive,Content-Type';
-        proxy_pass http://arena-persist:8884;
+        proxy_pass http://arena-persist:8884/persist/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade ${ESC}http_upgrade;
+        proxy_set_header Connection "Upgrade";
+    }
+
+    location ^~ /auth/ {
+        add_header 'Access-Control-Allow-Origin' "${ESC}http_origin";
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, DELETE, PUT';
+        add_header 'Access-Control-Allow-Credentials' 'true';
+        add_header 'Access-Control-Allow-Headers' 'User-Agent,Keep-Alive,Content-Type';
+        proxy_pass http://arena-auth:8888/;
         proxy_http_version 1.1;
         proxy_set_header Upgrade ${ESC}http_upgrade;
         proxy_set_header Connection "Upgrade";
@@ -93,11 +104,9 @@ server {
         proxy_set_header Connection "Upgrade";
         proxy_read_timeout 86400;
     }
-
-    location / {
+    location ~* / {
         root /usr/share/nginx/html;
-        index index.html index.htm index.nginx-debian.html;
-        try_files ${ESC}uri ${ESC}uri/ /index.html;
+        index index.html index.html;
         disable_symlinks off;
 
         add_header 'Access-Control-Allow-Origin' '*';
@@ -105,18 +114,43 @@ server {
         add_header 'Access-Control-Allow-Credentials' 'true';
         add_header 'Access-Control-Allow-Headers' 'User-Agent,Keep-Alive,Content-Type';
 
+        # Staging /dev/username folders
+        location ~* ^/dev {
+            autoindex on;
+            # Cover actual files in subdirectories of /dev/username/namespace
+            location ~* ^(/dev/[\w.-]+)(/[\w.-]+)(/[\w.-]+)(/.+) {
+                try_files ${ESC}uri ${ESC}uri/ ${ESC}1${ESC}3${ESC}4 ${ESC}1${ESC}3${ESC}4/ ${ESC}1${ESC}4 ${ESC}1${ESC}4/ ${ESC}1/index.html;
+            }
+            # Cover /dev/username/namespace/scenename and files in same path of /dev/username/namespace
+            location ~* ^(/dev/[\w.-]+)(/[\w.-]+)(/[\w.-]+) {
+                try_files ${ESC}uri ${ESC}uri/ ${ESC}1${ESC}3 ${ESC}3/ ${ESC}1/index.html;
+            }
+            # Catchall for rest of /dev/username
+            location ~* ^/dev/([\w.-]+)/ {
+                try_files ${ESC}uri ${ESC}uri/ /index.html;
+            }
+        }
+        # Cover actual files in subdirectories of /namespace (e.g. /namespace/vendor/env.js)
+        location ~* ^/([\w.-]+)/([\w.-]+)/(.+) {
+            try_files ${ESC}uri ${ESC}uri/ /${ESC}2/${ESC}3 /${ESC}2/${ESC}3/ ${ESC}3 ${ESC}3/ /index.html;
+        }
+        # Cover /namespace/scenename and files in same path of /namespace (e.g. /namespace/events.js)
+        location ~* ^/([\w.-]+)(/[\w.-]+) {
+            try_files ${ESC}uri ${ESC}uri/ ${ESC}2 ${ESC}2/  /index.html;
+        }
+        # Catch all for /scenename
+        location ~* / {
+            try_files ${ESC}uri ${ESC}uri/ /index.html;
+        }
+
         location ~ \.(css|html|js)$ {
             expires -1;
             add_header 'Cache-Control' 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0';
         }
 
-        location ^~ /store/users/ {    
+        location ^~ /store/users/ {
             autoindex on;
-        }  
-
-        location ^~ /dev/ {    
-            autoindex on;
-        }                          
+        }
     }
 }
 

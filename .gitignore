@@ -9,3 +9,4 @@ secret.bak
 secret.env
 *bak
 mongo-backup/
+*tmp
