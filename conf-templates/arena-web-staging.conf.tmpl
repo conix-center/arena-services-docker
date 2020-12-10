@@ -70,15 +70,23 @@ server {
     }
 
     location ^~ /user/static/ {
-      root /usr/share/nginx/html/;
+      alias /usr/share/nginx/account-static/;
     }
 
     location ^~ /user/ {
+        add_header 'Access-Control-Allow-Origin' "${ESC}http_origin";
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, DELETE, PUT';
+        add_header 'Access-Control-Allow-Credentials' 'true';
+        add_header 'Access-Control-Allow-Headers' 'User-Agent,Keep-Alive,Content-Type';
         proxy_pass http://arena-account:8000;
         proxy_http_version 1.1;
+        proxy_set_header Host ${ESC}host;
         proxy_set_header Upgrade ${ESC}http_upgrade;
         proxy_set_header Connection "Upgrade";
         proxy_read_timeout 86400;
+        proxy_set_header X-Forwarded-Proto  "https://";
+        proxy_set_header X-Forwarded-For    ${ESC}proxy_add_x_forwarded_for;
+        proxy_set_header X-Real-IP          ${ESC}remote_addr;
     }
 
     location ^~ /arts-api/ {

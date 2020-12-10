@@ -53,7 +53,7 @@ services:
   arena-account:
     build: "arena-account" # builds container from arena-account Dockerfile
     volumes:
-      - ./data/keys/pubsubkey.pub:/usr/src/app/pubsubkey.pub:ro # pubsub public key available to service
+      - ./data/keys/pubsubkey.pem:/home/node/app/pubsubkey.pem:ro # pubsub key available to service
     env_file: secret.env
     command: "python manage.py runserver 0.0.0.0:8000"
 
