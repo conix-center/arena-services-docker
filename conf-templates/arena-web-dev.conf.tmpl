@@ -72,6 +72,12 @@ server {
         proxy_set_header Connection "Upgrade";
         proxy_read_timeout 86400;
     }
+
+    location ^~ /store/users/ {
+        root /usr/share/nginx/html;
+        autoindex on;
+    }
+
     location ~* / {
         root /usr/share/nginx/html;
         index index.html index.html;
@@ -98,10 +104,6 @@ server {
         location ~ \.(css|html|js)$ {
             expires -1;
             add_header 'Cache-Control' 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0';
-        }
-
-        location ^~ /store/users/ {
-            autoindex on;
         }
     }
 }

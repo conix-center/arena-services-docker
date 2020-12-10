@@ -33,7 +33,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   # generate service tokens
   grep -v '^SERVICE_' secret.env > secret.tmp # remove all service tokens
   cp secret.tmp secret.env
-  services=( "arena_persist" "arena_arts" )
+  services=( "arena_persist" "arena_arts" "py_runtime")
   for s in "${services[@]}"
   do
     tn="SERVICE_${s^^}_JWT"

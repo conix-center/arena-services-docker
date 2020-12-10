@@ -1,6 +1,9 @@
 {
 	"mqtt_server": {
-		"host": "${HOSTNAME}"
+		"host": "${HOSTNAME}",
+	 	"port": 8883,
+		"username": "py_runtime",
+    	"password": "${SERVICE_PY_RUNTIME_JWT}"		
 	},
 	"runtime": {
 		"name": "py-runtime",
