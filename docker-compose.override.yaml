@@ -26,6 +26,7 @@ services:
       - mqtt
       - arena-persist
       - store
+      - arts
       - arena-account
 
   mongodb:
@@ -69,6 +70,8 @@ services:
     ports:
       - "8000:8000"
     command: "python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - arena-persist
 
   mqtt:
     image: conixcenter/arena-broker # pulls from https://hub.docker.com/repository/docker/conixcenter/arena-broker
@@ -89,6 +92,22 @@ services:
       - ./conf/arena-store-config.json:/arena-store/.config.json:ro
       - ./ARENA-core/store:/srv-files:rw
       - ./data/arena-store:/arena-store/data:rw
+
+  arts:
+    build: "arts/arts-main"
+    volumes:
+      - ./conf/arts-settings.py:/usr/src/app/arts_api/settings.py:ro
+    env_file: secret.env
+    command: "python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - mqtt
+
+  py-runtime:
+    build: "arena-runtime-simulated"
+    volumes:
+      - ./conf/arena-runtime-simulated.conf:/usr/src/app/config.json:ro
+    depends_on:
+      - arts
 
 volumes:
   account-static-content:

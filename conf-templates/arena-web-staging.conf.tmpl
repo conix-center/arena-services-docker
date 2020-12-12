@@ -70,7 +70,7 @@ server {
     }
 
     location ^~ /user/static/ {
-      alias /usr/share/nginx/account-static/;
+      root /usr/share/nginx/html/;
     }
 
     location ^~ /user/ {
