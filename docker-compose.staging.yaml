@@ -65,16 +65,8 @@ services:
     image: conixcenter/arena-broker # pulls from https://hub.docker.com/repository/docker/conixcenter/arena-broker
     volumes:
       - ./conf/mosquitto-br-conn.conf:/mosquitto/config/mosquitto.conf:ro # mount local config file to /mosquitto/config/mosquitto.conf in the container
+      - ./data/keys/pubsubkey.der:/pubsubkey.der:ro # pubsub key available to service
       - ./data/certbot/conf:/etc/letsencrypt:ro # mount certs volume (see conf/mosquitto.conf to see how the files are used)
-    env_file: secret.env
-    restart: unless-stopped
-
-  mqtt-br2:
-    image: conixcenter/arena-broker # pulls from https://hub.docker.com/repository/docker/conixcenter/arena-broker
-    volumes:
-      - ./conf/mosquitto-br-conn.conf:/mosquitto/config/mosquitto.conf:ro # mount local config file to /mosquitto/config/mosquitto.conf in the container
-      - ./data/certbot/conf:/etc/letsencrypt:ro # mount certs volume (see conf/mosquitto.conf to see how the files are used)
-    env_file: secret.env
     restart: unless-stopped
 
   store:
@@ -88,8 +80,10 @@ services:
   arts:
     volumes:
       - arts-static-content:/usr/src/app/public:ro # static arts visualization page
+    env_file:
+      - secret.env
     restart: unless-stopped # service will respawn unless we tell docker to stop it
-
+      
   py-runtime:
     restart: unless-stopped # service will respawn unless we tell docker to stop it
 

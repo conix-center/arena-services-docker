@@ -53,7 +53,7 @@ log_type all
 # Security
 # =================================================================
 
-#allow_anonymous false
+allow_anonymous false
 
 # -----------------------------------------------------------------
 # Default authentication and topic access control
@@ -74,9 +74,7 @@ persistence false
 # -----------------------------------------------------------------
 
 auth_plugin /usr/lib/libmosquitto_jwt_auth.so
-#auth_opt_jwt_alg HS256
 auth_opt_jwt_alg RS256
-#auth_opt_jwt_sec_env SECRET_KEY_BASE64
 auth_opt_jwt_sec_file /pubsubkey.der
 auth_opt_jwt_validate_exp true
 auth_opt_jwt_validate_sub_match_username true

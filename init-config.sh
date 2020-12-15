@@ -24,16 +24,21 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   chown $OWNER secret.env # change ownership of file created
 fi
 
-echo -e "\n### Creating RSA key pair (conf/keys/pubsubkey.pem). This will replace old keys (if exist; backup will be in data/keys/pubsubkeyspem.bak)."
+echo -e "\n### Creating RSA key pair for JWT (conf/keys/pubsubkey.pem). This will replace old keys (if exist; backup will be in data/keys/pubsubkeyspem.bak)."
 read -p "Create RSA key pair ? (y/N) " -r
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   openssl genrsa -out ./data/keys/pubsubkey.pem 4096
   openssl rsa -in ./data/keys/pubsubkey.pem -RSAPublicKey_out -outform pem -out ./data/keys/pubsubkey.pub
   openssl rsa -in ./data/keys/pubsubkey.pem -RSAPublicKey_out -outform DER -out ./data/keys/pubsubkey.der
-  # generate service tokens
+fi
+
+echo -e "\n### Creating Service Tokens. This will replace service tokens in secret.env (if exists; backup will be in secret.env.bak)."
+read -p "Create Service Tokens ? (y/N) " -r
+if [[ $REPLY =~ ^[Yy]$ ]]; then
   grep -v '^SERVICE_' secret.env > secret.tmp # remove all service tokens
+  cp secret.env secret.env.bak
   cp secret.tmp secret.env
-  services=( "arena_persist" "arena_arts" "py_runtime")
+  services=( "arena_persist" "arena_arts" "py_runtime" "mqttbr")
   for s in "${services[@]}"
   do
     tn="SERVICE_${s^^}_JWT"

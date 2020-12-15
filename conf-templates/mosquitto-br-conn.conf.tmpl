@@ -53,7 +53,7 @@ keyfile /etc/letsencrypt/live/${HOSTNAME}/privkey.pem
 # Security
 # =================================================================
 
-#allow_anonymous false
+allow_anonymous false
 
 # -----------------------------------------------------------------
 # Default authentication and topic access control
@@ -67,8 +67,10 @@ keyfile /etc/letsencrypt/live/${HOSTNAME}/privkey.pem
 # Connect to main mosquitto
 # -----------------------------------------------------------------
 connection mqttbr
-address ${HOSTNAME}
+address mqtt
 topic # both
+remote_username mqttbr
+remote_password ${SERVICE_MQTTBR_JWT}
 
 # -----------------------------------------------------------------
 # No Persist
@@ -80,6 +82,9 @@ persistence false
 # mosquitto-jwt-auth plugin
 # -----------------------------------------------------------------
 
-#auth_plugin /usr/lib/libmosquitto_jwt_auth.so
-#auth_opt_jwt_alg HS256
-#auth_opt_jwt_sec_env SECRET_KEY_BASE64
+auth_plugin /usr/lib/libmosquitto_jwt_auth.so
+auth_opt_jwt_alg RS256
+auth_opt_jwt_sec_file /pubsubkey.der
+auth_opt_jwt_validate_exp true
+auth_opt_jwt_validate_sub_match_username true
+

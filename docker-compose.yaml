@@ -28,6 +28,7 @@ services:
     image: mongo # pull from https://hub.docker.com/_/mongo/
     volumes:
       - ./data/mongodb:/data/db:rw # permanent storage on the host
+      - ./data/backup:/backup:rw # backup storage on the host
 
   arena-persist:
     build: "arena-persist" # builds container from arena-persist Dockerfile
@@ -65,13 +66,11 @@ services:
       - ./conf/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro # mount local config file to /mosquitto/config/mosquitto.conf in the container
       - ./data/keys/pubsubkey.der:/pubsubkey.der:ro # pubsub key available to service
       - ./data/certbot/conf:/etc/letsencrypt:ro # mount certs volume (see conf/mosquitto.conf to see how the files are used)
-    env_file: secret.env
 
   arts:
     build: "arts/arts-main"
     volumes:
       - ./conf/arts-settings.py:/usr/src/app/arts_api/settings.py:ro
-    env_file: secret.env
     command: "python manage.py runserver 0.0.0.0:8000"
     depends_on:
       - mqtt
