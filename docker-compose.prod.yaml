@@ -43,7 +43,7 @@ services:
   arena-account:
     volumes:
       - ./conf/arena-account-settings.py:/usr/src/app/arena_account/settings.py:ro
-      - account-static-content:/usr/src/app/static:ro # static content
+      - account-static-content:/usr/src/app/static # static content
       - ./data/account:/usr/src/app/db # account db
     env_file:
       - .env
@@ -64,13 +64,18 @@ services:
       - ./conf/mosquitto-br-conn.conf:/mosquitto/config/mosquitto.conf:ro # mount local config file to /mosquitto/config/mosquitto.conf in the container
       - ./data/keys/pubsubkey.der:/pubsubkey.der:ro # pubsub key available to service
       - ./data/certbot/conf:/etc/letsencrypt:ro # mount certs volume (see conf/mosquitto.conf to see how the files are used)
+    depends_on:
+      - mqtt
     restart: unless-stopped
 
   mqtt-br2:
     image: conixcenter/arena-broker # pulls from https://hub.docker.com/repository/docker/conixcenter/arena-broker
     volumes:
       - ./conf/mosquitto-br-conn.conf:/mosquitto/config/mosquitto.conf:ro # mount local config file to /mosquitto/config/mosquitto.conf in the container
+      - ./data/keys/pubsubkey.der:/pubsubkey.der:ro # pubsub key available to service
       - ./data/certbot/conf:/etc/letsencrypt:ro # mount certs volume (see conf/mosquitto.conf to see how the files are used)
+    depends_on:
+      - mqtt
     restart: unless-stopped
 
   store:
