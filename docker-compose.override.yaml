@@ -10,14 +10,14 @@ version: '3'
 services:
 
   arena-web: # create a container named "arena-web"; other service containers in this file can resolve its name (arena-web)
-    image: "nginx" # builds container from arena-persist Dockerfile
+    image: "nginx" # creates container from nginx
     volumes:
       - ./conf/arena-web-dev.conf:/etc/nginx/conf.d/arena-web.conf:ro # mount nginx config
-      - ./ARENA-core:/usr/share/nginx/html:ro # set arena client code defaults
-      - ./conf/arena-web-conf:/usr/share/nginx/html/conf # arena client code conf
+      - ./ARENA-core:/usr/share/nginx/html:ro # mount root html from ./ARENA-core
+      - ./conf/arena-web-conf:/usr/share/nginx/html/conf:ro # arena client code conf
       - ./data/certbot/conf:/etc/letsencrypt:ro # mount certbot files (used in conf/nginx-conf.d/arena-web.conf)
       - ./data/certbot/www:/var/www/certbot:ro # mount certbot files (used in conf/nginx-conf.d/arena-web.conf)
-      - account-static-content:/usr/share/nginx/account-static # serve account static files
+      - account-static-content:/usr/share/nginx/account-static:ro # serve account static files
     ports:
       - "80:80" # map port 80 on the host to port 80 on the container
       - "443:443"
@@ -54,6 +54,8 @@ services:
       - ./conf/auth-config.json:/home/node/app/config.json:ro # mount updated config.json that uses indicates right paths and secret
       - ./data/keys/pubsubkey.pem:/home/node/app/pubsubkey.pem:ro # pubsub key available to service
       - ./data/certbot/conf:/etc/letsencrypt:ro
+    ports:
+      - 8888:8888/tcp
     command: "node index.js -c ./config.json"
 
   arena-account:

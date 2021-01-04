@@ -58,6 +58,7 @@ AUTHENTICATION_BACKENDS = (
 # allauth social accounts
 SITE_ID = 2  # must match our domain Site used in admin: Sites
 LOGIN_REDIRECT_URL = '/user/login_callback'
+SOCIALACCOUNT_AUTO_SIGNUP = False  # require social accounts to use the signup form
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
