@@ -31,6 +31,36 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'arena-account']
 USE_X_FORWARDED_HOST = True
 MQTT_TOKEN_PRIVKEY = "/home/node/app/pubsubkey.pem"
 
+# TODO (mwfarb): this list can be reduced after webserver refactor
+# namespaces that are reserved for the webserver, see ARENA-core and nginx
+USERNAME_RESERVED = [
+    'aframe',
+    'apriltag',
+    'ar',
+    'audio',
+    'auth',  # nginx
+    'build',
+    'chat',
+    'conf',
+    'face-tracking',
+    'icons',
+    'images',
+    'libs',
+    'models',
+    'mqtt',  # nginx
+    'network',
+    'node_modules',
+    'persist',  # nginx
+    'runtime-mngr',
+    'screenshare',
+    'signin',
+    'store',
+    'storemng',  # nginx
+    'textures',
+    'user',  # nginx
+    'vendor',
+]
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -58,7 +88,9 @@ AUTHENTICATION_BACKENDS = (
 # allauth social accounts
 SITE_ID = 2  # must match our domain Site used in admin: Sites
 LOGIN_REDIRECT_URL = '/user/login_callback'
-SOCIALACCOUNT_AUTO_SIGNUP = False  # require social accounts to use the signup form
+# require social accounts to use the signup form
+SOCIALACCOUNT_AUTO_SIGNUP = False
+SOCIALACCOUNT_EMAIL_REQUIRED = True
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
