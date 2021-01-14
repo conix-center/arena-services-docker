@@ -58,8 +58,6 @@ services:
     depends_on:
       - arena-persist
     command: "python manage.py runserver 0.0.0.0:8000"
-    depends_on:
-      - arena-persist
 
   mqtt:
     image: conixcenter/arena-broker # pulls from https://hub.docker.com/repository/docker/conixcenter/arena-broker
