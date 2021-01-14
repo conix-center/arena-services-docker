@@ -107,7 +107,7 @@ Before starting services, we need to create the configuration files for the serv
 
 The init script will generate configuration files (from the templates in [conf/templates](conf/templates)) for the services using the hostname and email configured in [init.env](init.env), and attempt to create certificates using letsencrypt. **If letsencrypt fails, it will create a self-signed certificate that can be used for testing purposes**.
 
-* Note: you might need to execute ```sudo  docker-compose up -d``` if [your user does not have permissions to access the docker service](https://docs.docker.com/engine/install/linux-postinstall/).
+* Note: you might need to execute ```sudo  ./init.sh``` if [your user does not have permissions to access the docker service](https://docs.docker.com/engine/install/linux-postinstall/).
 * Note: The file ```init.env``` is used only the first time you run ```init.sh```; its contents are copied to ```.env``` after the first run, and ```.env``` is the file used at runtime.
 
 3. Start all services:
@@ -127,7 +127,7 @@ The init script will generate configuration files (from the templates in [conf/t
  ./dev.sh up -d
 ```
 
-* Note: you might need to execute the above commands with ```sudo``` if [your user does not have permissions to access the docker service](https://docs.docker.com/engine/install/linux-postinstall/).
+* Note: you might need to execute the above commands with ```sudo``` (e.g. ```sudo ./prod.sh up```) if [your user does not have permissions to access the docker service](https://docs.docker.com/engine/install/linux-postinstall/).
 * See [utility scripts](utility-scripts) for details.
 
 ## File Store

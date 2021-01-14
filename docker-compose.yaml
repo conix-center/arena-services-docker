@@ -55,6 +55,8 @@ services:
     build: "arena-account" # builds container from arena-account Dockerfile
     volumes:
       - ./data/keys/pubsubkey.pem:/home/node/app/pubsubkey.pem:ro # pubsub key available to service
+    depends_on:
+      - arena-persist
     command: "python manage.py runserver 0.0.0.0:8000"
     depends_on:
       - arena-persist
