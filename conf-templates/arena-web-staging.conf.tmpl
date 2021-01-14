@@ -11,6 +11,11 @@ server {
     include             /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
 
+    location = /robots.txt {
+        add_header  Content-Type  text/plain;
+        return 200 "User-agent: *\nDisallow: /\n";
+    }
+
     location ^~ /mqtt/ {
         proxy_pass http://mqtt:9001;
         proxy_http_version 1.1;
@@ -58,12 +63,17 @@ server {
     }
 
     location ^~ /user/static/ {
-      root /usr/share/nginx/html/;
+        root /usr/share/nginx/html/;
     }
 
     location ^~ /user/ {
+        add_header 'Access-Control-Allow-Origin' "${ESC}http_origin";
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, DELETE, PUT';
+        add_header 'Access-Control-Allow-Credentials' 'true';
+        add_header 'Access-Control-Allow-Headers' 'User-Agent,Keep-Alive,Content-Type';
         proxy_pass http://arena-account:8000;
         proxy_http_version 1.1;
+        proxy_set_header Host ${ESC}host;
         proxy_set_header Upgrade ${ESC}http_upgrade;
         proxy_set_header Connection "Upgrade";
         proxy_read_timeout 86400;

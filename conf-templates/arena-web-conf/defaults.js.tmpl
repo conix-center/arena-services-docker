@@ -1,21 +1,28 @@
-const defaults = {
-     realm: "realm",
-     updateMillis:100,
-     scenenameParam:"render",
-     userParam:"X",
-     startCoords:"0,1.6,0",
-     themeParam:"starry",
-     weatherParam:"none",
-     mqttParamZ:"${HOSTNAME}",
-     screenSharePath:"screenshare",
-     fixedCamera:"",
-     ATLASurl:"//atlas.conix.io",
-     screenSharePath:"screenshare",
-     vioTopic:"/topic/vio/",
-     graphTopic:"${ESC}NETWORK/latency",
-     mqttPath:["/mqtt/"],
-     persistHost:"${HOSTNAME}",
-     persistPath:"/persist/",
-     urlMqttAuth:"https://${HOSTNAME}/auth/",
-     gAuthClientId:'${GAUTH_CLIENTID}'
+/* eslint-disable no-unused-vars */
+/**
+ * @fileoverview Define ARENA defaults
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
+ * @date 2020
+ */
+
+const ARENADefaults = {
+    realm: 'realm',
+    camUpdateIntervalMs: 100,
+    namespace: 'public',
+    sceneName: 'lobby',
+    userName: 'Anonymous',
+    startCoords: '0,1.6,0',
+    mqttHost: '${HOSTNAME}',
+    ATLASurl: '//atlas.conix.io',
+    vioTopic: '/topic/vio/',
+    graphTopic: '${ESC}NETWORK',
+    latencyTopic: '${ESC}NETWORK/latency',
+    mqttPath: ['/mqtt/'],
+    persistHost: '${HOSTNAME}',
+    persistPath: '/persist/',
+    urlMqttAuth: 'https://${HOSTNAME}/auth/',
+    gAuthClientId: '${GAUTH_CLIENTID}',
+    supportDevFolders: true,
 };
