@@ -34,6 +34,8 @@ MQTT_TOKEN_PRIVKEY = "/home/node/app/pubsubkey.pem"
 # TODO (mwfarb): this list can be reduced after webserver refactor
 # namespaces that are reserved for the webserver, see ARENA-core and nginx
 USERNAME_RESERVED = [
+    '.cache',
+    '.github',
     'aframe',
     'apriltag',
     'ar',
@@ -42,6 +44,7 @@ USERNAME_RESERVED = [
     'build',
     'chat',
     'conf',
+    'dist',
     'face-tracking',
     'icons',
     'images',
@@ -55,6 +58,7 @@ USERNAME_RESERVED = [
     'runtime-mngr',
     'screenshare',
     'scene',
+    'src',
     'signin',
     'store',
     'storemng',  # proxy
@@ -136,6 +140,27 @@ MESSAGE_TAGS = {
 
 # TODO (mwfarb): For production, change backend to an email sending service.
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+    'loggers': {
+        '*': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
