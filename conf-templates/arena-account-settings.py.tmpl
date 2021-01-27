@@ -76,7 +76,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users',
     'crispy_forms',
     'django.contrib.sites',
     'allauth',
@@ -87,6 +86,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_swagger',
     'drf_yasg',
+    'users.apps.UsersConfig',
 ]
 
 AUTHENTICATION_BACKENDS = (
@@ -107,17 +107,24 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.JSONParser',
     ],
 }
+
 # allauth social accounts
 SITE_ID = 2  # must match our domain Site used in admin: Sites
 LOGIN_REDIRECT_URL = '/user/login_callback'
 # require social accounts to use the signup form
 SOCIALACCOUNT_AUTO_SIGNUP = False
 SOCIALACCOUNT_EMAIL_REQUIRED = True
+#SOCIALACCOUNT_STORE_TOKENS = False
 
 SOCIALACCOUNT_FORMS = {'signup': 'users.forms.SocialSignupForm'}
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
+        "APP": {
+            "client_id": os.getenv('GAUTH_CLIENTID'),
+            "secret": os.getenv('GAUTH_CLIENTSECRET'),
+            "key": ""
+        },
         'SCOPE': [
             'profile',
             'email',
