@@ -1,6 +1,6 @@
 #!/bin/bash
 
-submodules=( "ARENA-core:master" "ARENA-auth:master" "arena-account:main" "arena-persist:master" "arts:master" "arena-runtime-simulated:master")
+submodules=( "ARENA-core:master" "arena-account:main" "arena-persist:master" "arts:master" "arena-runtime-simulated:master")
 
 echo -e "\n###Pulling lastest version of submodules."
 for s in "${submodules[@]}"

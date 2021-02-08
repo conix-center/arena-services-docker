@@ -37,9 +37,6 @@ services:
   arena-persist:
     restart: unless-stopped
 
-  arena-auth:
-    restart: unless-stopped
-
   arena-account:
     volumes:
       - ./conf/arena-account-settings.py:/usr/src/app/arena_account/settings.py:ro

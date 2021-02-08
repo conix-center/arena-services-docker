@@ -38,11 +38,6 @@ services:
   arena-persist:
     restart: unless-stopped
 
-  arena-auth:
-    ports:
-      - 8888:8888/tcp
-    restart: unless-stopped
-
   arena-account:
     volumes:
       - ./conf/arena-account-settings.py:/usr/src/app/arena_account/settings.py:ro
@@ -85,7 +80,7 @@ services:
     env_file:
       - secret.env
     restart: unless-stopped # service will respawn unless we tell docker to stop it
-      
+
   py-runtime:
     restart: unless-stopped # service will respawn unless we tell docker to stop it
 

@@ -47,17 +47,6 @@ services:
       - mongodb
       - mqtt
 
-  arena-auth:
-    build: "ARENA-auth" # builds container from arena-persist Dockerfile
-    user: "root"
-    volumes:
-      - ./conf/auth-config.json:/home/node/app/config.json:ro # mount updated config.json that uses indicates right paths and secret
-      - ./data/keys/pubsubkey.pem:/home/node/app/pubsubkey.pem:ro # pubsub key available to service
-      - ./data/certbot/conf:/etc/letsencrypt:ro
-    ports:
-      - 8888:8888/tcp
-    command: "node index.js -c ./config.json"
-
   arena-account:
     build: "arena-account" # builds container from arena-account Dockerfile
     volumes:
