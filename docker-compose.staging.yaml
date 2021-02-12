@@ -76,7 +76,7 @@ services:
 
   arts:
     volumes:
-      - arts-static-content:/usr/src/app/public:ro # static arts visualization page
+      - arts-static-content:/usr/src/app/public # static arts visualization page
     env_file:
       - secret.env
     restart: unless-stopped # service will respawn unless we tell docker to stop it
@@ -103,7 +103,7 @@ services:
     image: prom/prometheus:latest
     user: "root"
     volumes:
-      - ./conf/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./conf/prometheus-staging.yml:/etc/prometheus/prometheus.yml:ro
       - ./data/prometheus/:/prometheus/
     command: [ "--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus", "--storage.tsdb.retention.time=30d" ]
     restart: unless-stopped # service will respawn unless we tell docker to stop it
@@ -115,6 +115,9 @@ services:
       - 3000:3000
     volumes:
       - ./data/grafana:/var/lib/grafana:rw
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_NAME=CONIX
     restart: unless-stopped # service will respawn unless we tell docker to stop it
 
   restarter:

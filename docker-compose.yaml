@@ -60,7 +60,7 @@ services:
     build: "arts/arts-main"
     volumes:
       - ./conf/arts-settings.py:/usr/src/app/arts_api/settings.py:ro
-    command: "python manage.py runserver 0.0.0.0:8000"
+    command: ["./wait-for-it.sh", "mqtt:1883", "--", "python", "manage.py", "runserver", "0.0.0.0:8000"]
     depends_on:
       - mqtt
 

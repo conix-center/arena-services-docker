@@ -123,6 +123,9 @@ services:
       - 3000:3000
     volumes:
       - ./data/grafana:/var/lib/grafana:rw
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_NAME=CONIX
     restart: unless-stopped # service will respawn unless we tell docker to stop it
 
   restarter:

@@ -49,12 +49,13 @@ fi
 # load secrets 
 export $(grep -v '^#' secret.env | xargs)
 
-echo -e "\n### Contents of .env:\n"
+echo -e "\n### Creating config files (conf/*) from templates (conf-templates/*) and .env"
+echo -e "\n\nContents of .env:\n"
 cat .env
 echo
 
 echo -e "Please edit the file .env (shown above) to reflect your setup (hostname, email, ...). \n"
-read -p "Continue? (y/N)" -r
+read -p "Continue and create config files (backups will be created in conf/)? (y/N)" -r
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     echo "Stopped."
@@ -64,7 +65,6 @@ fi
 # setup escape var for envsubst templates
 export ESC="$"
 
-echo -e "\n### Creating config files (conf/*) from templates (conf-templates/*)"
 for t in $(find conf-templates/ -type f)
 do
   t="${t:15}" # remove "conf-templates/"
