@@ -27,6 +27,8 @@ services:
       - arena-persist
       - store
       - arena-account
+      - arts
+      # - py-runtime
 
   mongodb:
     image: mongo # pull from https://hub.docker.com/_/mongo/
@@ -62,7 +64,6 @@ services:
     command: "python manage.py runserver 0.0.0.0:8000"
     depends_on:
       - arena-persist
-      - mongodb
 
   mqtt:
     image: conixcenter/arena-broker # pulls from https://hub.docker.com/repository/docker/conixcenter/arena-broker
@@ -76,6 +77,14 @@ services:
       - 9001:9001/tcp # mqtt-ws
       - 8083:8083/tcp # mqtt-wss
       - 8883:8883/tcp # mqtt-tls
+    # healthcheck:
+    #     test: ["CMD", "ls", "-l"]
+    #     #test: ["CMD", "curl", "-f", "http://localhost:9001"]
+    #     #test: ["CMD", "mosquitto_sub", "-h", "http://localhost", "-t", "#", "-u", "cli", "-p", "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJjbGkiLCJzdWJzIjpbIiMiXSwicHVibCI6WyIjIl0sImlhdCI6MTYwNzI4MzU0MSwiZXhwIjoxNjM4ODE5NTQxfQ.huVkRCpyCNJLceijqWaW1rHnmnD5vIIO82CtKygl8wfBbscyflc3eHo5z_h6vin6X3zyXNES3XfJ_L3SUYjK_4DaTD7iGqqrOpO-D_u4za0fWUd62RfM32MJ1WGQRe8d20wPeNcnoaDgc787YMa6GdN6LrE45vXbvVOSV2EP_3__3vdO1Bi_HCg55sG8qra6RyvOxUlx-9wF5B8LXnN2YU_WWK835OScg3Peq0yTgU4IUjba4V_lpVwlYcVvdxPEnNb20jdENVaoIBndsy2-XQbqaZw63SsZshGqazvyP0D-ASN7pCoHKIcffAEx45pyJY-ZHDCcMIZGBHbiigTPEzZ2e1uRmwJe_ziBi6EwHhHffpYdRdsDmAD9svEjYU5L-DMrBpNKyYfhZl4kTSP1aJMCXRaMZoSaATp73tuwPoX-oufzVpmfqcSrPh6k_yw0wsJU9KwRq_m3vw6ibhmqGsGRdKe2mQMmIhsagJrfIw8tQaB9jkpVabFkkBiszpiRF6433O9CM6p8GCbjQUXtKODWNmIbG9AiTas5exj8ih4PYuNojX9jbPdxfkj2Ik76rK5eaWPg9YH8zWbPoJlVyQMmihtwpcFgAYu26nmBemCefUod0jegzI7Rtmwq7JEzZkDWUoap7LoEe-jTBWbw3nTzIaSPWeL1ZIdz1kVzWN0"]
+    #     #test: ["CMD-SHELL", "timeout -t 5 mosquitto_sub -t '$$SYS/#' -C 1 | grep -v Error || exit 1"]
+    #     interval: 10s
+    #     timeout: 10s
+    #     retries: 6
 
   store:
     image: "conixcenter/arena-store"  # pulls from https://hub.docker.com/repository/docker/conixcenter/arena-store
@@ -84,5 +93,31 @@ services:
       - ./ARENA-core/store:/srv-files:rw
       - ./data/arena-store:/arena-store/data:rw
 
+  arts:
+    build: "arts/arts-main"
+    volumes:
+      - ./conf/arts-settings.py:/usr/src/app/arts_api/settings.py:ro
+      - arts-static-content:/usr/src/app/public:ro # static arts visualization page
+    env_file:
+      - .env
+      - secret.env
+    command: "python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      mqtt:
+        condition: service_healthy
+    # depends_on:
+    #   - mqtt
+
+  py-runtime:
+    build: "arena-runtime-simulated"
+    volumes:
+      - ./conf/arena-runtime-simulated.conf:/usr/src/app/config.json:ro
+    depends_on:
+      mqtt:
+        condition: service_healthy
+    depends_on:
+      - arts
+
 volumes:
+  arts-static-content:
   account-static-content:

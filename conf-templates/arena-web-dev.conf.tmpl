@@ -56,6 +56,22 @@ server {
         proxy_read_timeout 86400;
     }
 
+    location ^~ /arts-api/ {
+        proxy_pass http://arts:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade ${ESC}http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_read_timeout 86400;
+    }
+
+    location ^~ /pythonrt/ {
+        proxy_pass http://py-runtime:5000/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade ${ESC}http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_read_timeout 86400;
+    }
+
     location ^~ /storemng/ {
         proxy_pass http://store:8080/;
         proxy_http_version 1.1;
