@@ -5,27 +5,28 @@
 #
 # NOTE: if -f is not given, 'docker-compose up' will use docker-compose.override.yaml (https://docs.docker.com/compose/extends/)
 
-version: '3'
+version: "3"
 
 services:
-
   arena-web: # create a container named "arena-web"; other service containers in this file can resolve its name (arena-web)
     image: "nginx" # creates container from nginx
     volumes:
       - ./conf/arena-web-dev.conf:/etc/nginx/conf.d/arena-web.conf:ro # mount nginx config
       - ./ARENA-core:/usr/share/nginx/html:ro # mount root html from ./ARENA-core
       - ./conf/arena-web-conf:/usr/share/nginx/html/conf:ro # arena client code conf
+      - arts-static-content:/usr/share/nginx/html/arts:ro # serve arts static files
       - ./data/certbot/conf:/etc/letsencrypt:ro # mount certbot files (used in conf/nginx-conf.d/arena-web.conf)
       - ./data/certbot/www:/var/www/certbot:ro # mount certbot files (used in conf/nginx-conf.d/arena-web.conf)
       - account-static-content:/usr/share/nginx/account-static:ro # serve account static files
     ports:
       - "80:80" # map port 80 on the host to port 80 on the container
       - "443:443"
-    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'" # reload certificates every 6h
+    command: '/bin/sh -c ''while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"''' # reload certificates every 6h
     depends_on:
       - mqtt
       - arena-persist
       - store
+      - arts
       - arena-account
 
   mongodb:
@@ -77,11 +78,42 @@ services:
       - 8883:8883/tcp # mqtt-tls
 
   store:
-    image: "conixcenter/arena-store"  # pulls from https://hub.docker.com/repository/docker/conixcenter/arena-store
+    image: "conixcenter/arena-store" # pulls from https://hub.docker.com/repository/docker/conixcenter/arena-store
     volumes:
       - ./conf/arena-store-config.json:/arena-store/.config.json:ro
       - ./ARENA-core/store:/srv-files:rw
       - ./data/arena-store:/arena-store/data:rw
 
+  arts:
+    build: "arts/arts-main"
+    volumes:
+      - ./conf/arts-settings.py:/usr/src/app/arts_api/settings.py:ro
+      - arts-static-content:/usr/src/app/public # static arts visualization page
+    env_file:
+      - secret.env
+    command:
+      [
+        "./wait-for-it.sh",
+        "mqtt:1883",
+        "--",
+        "python",
+        "manage.py",
+        "runserver",
+        "0.0.0.0:8000",
+      ]
+    depends_on:
+      - mqtt
+    depends_on:
+      mqtt:
+        condition: service_healthy
+
+  py-runtime:
+    build: "arena-runtime-simulated"
+    volumes:
+      - ./conf/arena-runtime-simulated.conf:/usr/src/app/config.json:ro
+    depends_on:
+      - arts
+
 volumes:
+  arts-static-content:
   account-static-content:

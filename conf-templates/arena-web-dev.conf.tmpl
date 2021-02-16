@@ -11,7 +11,7 @@ server {
     include             /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
 
-    location = / {  
+    location = / {
         return 301 "/user";
     }
 
@@ -55,6 +55,22 @@ server {
         proxy_pass http://arena-account:8000;
         proxy_http_version 1.1;
         proxy_set_header Host ${ESC}host;
+        proxy_set_header Upgrade ${ESC}http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_read_timeout 86400;
+    }
+
+    location ^~ /arts-api/ {
+        proxy_pass http://arts:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade ${ESC}http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_read_timeout 86400;
+    }
+
+    location ^~ /pythonrt/ {
+        proxy_pass http://py-runtime:5000/;
+        proxy_http_version 1.1;
         proxy_set_header Upgrade ${ESC}http_upgrade;
         proxy_set_header Connection "Upgrade";
         proxy_read_timeout 86400;
