@@ -1,15 +1,15 @@
 [submodule "ARENA-core"]
 	path = ARENA-core
-	url = git@github.com:conix-center/ARENA-core.git
+	url = https://github.com/conix-center/ARENA-core.git 
 [submodule "arena-persist"]
 	path = arena-persist
-	url = git@github.com:conix-center/arena-persist.git
+	url = https://github.com/conix-center/arena-persist.git 
 [submodule "arts"]
 	path = arts
-	url = git@github.com:conix-center/arts.git
+	url = https://github.com/conix-center/arts.git 
 [submodule "arena-runtime-simulated"]
 	path = arena-runtime-simulated
-	url = git@github.com:conix-center/arena-runtime-simulated.git
+	url = https://github.com/conix-center/arena-runtime-simulated.git 
 [submodule "arena-account"]
 	path = arena-account
-	url = git@github.com:conix-center/arena-account.git
+	url = https://github.com/conix-center/arena-account.git 
