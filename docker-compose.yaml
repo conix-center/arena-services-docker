@@ -35,7 +35,7 @@ services:
     user: "node"
     volumes:
       - ./conf/persist-config.json:/home/node/app/config.json:ro # mount updated config.json that uses the container name
-      - ./data/keys/pubsubkey.pub:/home/node/app/pubsubkey.pub:ro # pubsub public key available to service
+      - ./data/keys/jwt.public.pem:/home/node/app/pubsubkey.pub:ro # pubsub public key available to service
     command: "npm run start"
     depends_on:
       - mongodb
@@ -44,7 +44,7 @@ services:
   arena-account:
     build: "arena-account" # builds container from arena-account Dockerfile
     volumes:
-      - ./data/keys/pubsubkey.pem:/home/node/app/pubsubkey.pem:ro # pubsub key available to service
+      - ./data/keys/jwt.priv.pem:/home/node/app/pubsubkey.pem:ro # pubsub key available to service
     depends_on:
       - arena-persist
     command: "python manage.py runserver 0.0.0.0:8000"
@@ -53,7 +53,7 @@ services:
     image: conixcenter/arena-broker # pulls from https://hub.docker.com/repository/docker/conixcenter/arena-broker
     volumes:
       - ./conf/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro # mount local config file to /mosquitto/config/mosquitto.conf in the container
-      - ./data/keys/pubsubkey.der:/pubsubkey.der:ro # pubsub key available to service
+      - ./data/keys/jwt.public.der:/pubsubkey.der:ro # pubsub key available to service
       - ./data/certbot/conf:/etc/letsencrypt:ro # mount certs volume (see conf/mosquitto.conf to see how the files are used)
 
   arts:

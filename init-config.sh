@@ -24,12 +24,19 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   chown $OWNER secret.env # change ownership of file created
 fi
 
-echo -e "\n### Creating RSA key pair for JWT (conf/keys/pubsubkey.pem). This will replace old keys (if exist; backup will be in data/keys/pubsubkeyspem.bak)."
+echo -e "\n### Creating RSA key pair for JWT (conf/keys/jwt.priv.pem). This will replace old keys (if exist; backup will be in data/keys/jwt.priv.pem.bak)."
 read -p "Create RSA key pair ? (y/N) " -r
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-  openssl genrsa -out ./data/keys/pubsubkey.pem 4096
-  openssl rsa -in ./data/keys/pubsubkey.pem -RSAPublicKey_out -outform pem -out ./data/keys/pubsubkey.pub
-  openssl rsa -in ./data/keys/pubsubkey.pem -RSAPublicKey_out -outform DER -out ./data/keys/pubsubkey.der
+  [ -f ./data/keys/jwt.priv.pem ] && cp ./data/keys/jwt.priv.pem data/keys/jwt.priv.pem.bak
+  rm ./data/keys/*
+  openssl genrsa -out ./data/keys/jwt.priv.pem 4096
+  openssl rsa -in ./data/keys/jwt.priv.pem -pubout -outform PEM -out ./data/keys/jwt.public.pem
+  openssl rsa -in ./data/keys/jwt.priv.pem -RSAPublicKey_out -outform DER -out ./data/keys/jwt.public.der # mqtt auth plugin requires RSAPublicKey format
+  # change ownership public keys
+  chown $OWNER ./data/keys/jwt.public*
+  # copy public key to /conf/sha256(hostname).pem to be used for Atlassian Service Authentication Protocol (ASAP)
+  PUB_KEY_FILENAME=$(echo -n $HOSTNAME | shasum -a 256).pem
+  echo ./data/keys/jwt.public.pem > ./conf/arena-web-conf/$PUB_KEY_FILENAME
 fi
 
 echo -e "\n### Creating Service Tokens. This will replace service tokens in secret.env (if exists; backup will be in secret.env.bak)."
@@ -42,7 +49,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   for s in "${services[@]}"
   do
     tn="SERVICE_${s^^}_JWT"
-    echo "$tn=$(python /utils/genjwt.py -k ./data/keys/pubsubkey.pem $s)" >> secret.env
+    echo "$tn=$(python /utils/genjwt.py -k ./data/keys/jwt.priv.pem $s)" >> secret.env
   done
 fi
 
@@ -79,5 +86,26 @@ do
   chown $OWNER conf/$f
 done
 
-# copy public key
-[ -f "./data/keys/pubsubkey.pub" ] && cp ./data/keys/pubsubkey.pub ./conf/arena-web-conf/ 
+if [[ ! -z "$JITSI_HOSTNAME" ]]; then
+    echo -e "\n### If you are going to setup a Jitsi server on this machine, you will configure nginx to redirect http requests to a Jitsi virtual host (JITSI_HOSTNAME is an alias to the IP of the machine)."
+    read -p "Add server block to redirect requests to Jitsi ? (y/N) " -r
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        TMPFN=/tmp/$(openssl rand -base64 12)
+        cat > $TMPFN <<  EOF
+server {
+    server_name         $JITSI_HOSTNAME;
+    listen              80;
+    location /.well-known/acme-challenge/ {  
+        proxy_pass http://$JITSI_HOSTNAME:8000;       
+    }    
+    location / {  
+        rewrite ^ https://$JITSI_HOSTNAME:8443$request_uri? permanent;
+    }    
+}
+EOF
+        # add server block to production and staging
+        cat $TMPFN >> ./conf/arena-web.conf
+        cat $TMPFN >> ./conf/arena-web-staging.conf
+        rm $TMPFN
+    fi
+fi 

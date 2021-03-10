@@ -31,6 +31,7 @@ git clone git@github.com:conix-center/arena-services-docker.git --recurse-submod
 
 ```bash
 HOSTNAME=full.domain.name.of.your.host
+JITSI_HOSTNAME=full.domain.name.of.your.jitsi.host
 EMAIL=nouser@nomail.com
 BACKUP_USER=1001:1001
 GAUTH_CLIENTID=Google_OAuth_Web_Client_ID
@@ -41,10 +42,18 @@ DJANGO_SUPERUSER_USERNAME=admin
 DJANGO_SUPERUSER_EMAIL=admin@example.com
 ```
 * ```HOSTNAME``` is the fully qualified domain name (FQDN) of your host. If you don't have a FQDN, you can do a local setup; see [Init Config](#init-config).
+
+* ```JITSI_HOSTNAME``` is the fully qualified domain name (FQDN) of the jitsi server you will use. 
+
 * ```EMAIL``` is the email used to get the certificates with [letsencrypt](https://letsencrypt.org/).
+
 * ```BACKUP_USER``` is the ```user:group``` of the *host machine user* that needs to access files backed up by the backup container.
+
 * ```ACCOUNT_SU_NAME``` and ```ACCOUNT_SU_EMAIL``` are the account admin user and email.
-* * Note: The file ```init.env``` is used only the first time you run ```init.sh```; its contents are copied to ```.env``` after the first run, and ```.env``` is the file used at runtime.
+
+> The file ```init.env``` is used only the first time you run ```init.sh```; its contents are copied to ```.env``` after the first run, and ```.env``` is the file used at runtime.
+
+> If you are setting up a jitsi server in the same machine, see [Init Config](#init-config) for details. 
 
 4. Run init script:
 
@@ -52,8 +61,8 @@ DJANGO_SUPERUSER_EMAIL=admin@example.com
  ./init.sh
 ```
 
-* On the first execution, answer **Yes** to all questions of the script. The script will attempt to create certificates using [letsencrypt](https://letsencrypt.org/). Self-signed certificates will be created instead if letsencrypt's certbot fails.
-* You might need to execute ```sudo ./init.sh``` if [your user does not have permissions to access the docker service](https://docs.docker.com/engine/install/linux-postinstall/).
+* On the first execution, answer **Y**es to all questions of the script. The script will attempt to create certificates using [letsencrypt](https://letsencrypt.org/). Self-signed certificates will be created instead if letsencrypt's certbot fails.
+> You might need to execute ```sudo ./init.sh``` if [your user does not have permissions to access the docker service](https://docs.docker.com/engine/install/linux-postinstall/).
 
 5. If you see no errors; you are good to start all services:
 
@@ -61,9 +70,9 @@ DJANGO_SUPERUSER_EMAIL=admin@example.com
  ./prod.sh up
 ```
 
-* You might need to execute ```sudo``` (e.g. ```sudo ./prod.sh up```) if your user does not have permission to access the docker service.
-* For more details, see [Init Config](#init-config) Section below.
-* We also have configurations for development and staging. See the [utility scripts Section](#utility-scripts)
+> You might need to execute ```sudo``` (e.g. ```sudo ./prod.sh up```) if your user does not have permission to access the docker service.
+> For more details, see [Init Config](#init-config) Section below.
+> We also have configurations for development and staging. See the [utility scripts Section](#utility-scripts)
 
 4. Open the file store management interface and change the default admin password (**user**:admin;**pass**:admin). To open the file store, point to ```/storemng``` (e.g. ```https://arena.andrew.cmu.edu/storemng```) in your browser. See details in the [File Store](#file-store) Section below.
 
@@ -97,7 +106,16 @@ Before starting services, we need to create the configuration files for the serv
 > ```
 > This will result in creating a self-signed certificate to be used with the services. This is the name you will enter in your browser: [https://localhost](https:///localhost)
 > **Make sure the above name resolves in your system (by adding it to [the ```hosts file```](https://linuxize.com/post/how-to-edit-your-hosts-file/))**.
+>
 > * Note: The file ```init.env``` is used only the first time you run ```init.sh```; its contents are copied to ```.env``` after the first run, and ```.env``` is the file used at runtime.
+
+> ### Setup (public) jitsi in the same machine
+> 
+> If you are going to setup a jitsi instance in the same machine, add the jitsi hostname to `.env`:
+> ```
+> JITSI_HOSTNAME=<jitsi-hostname>
+> ```
+> The jitsi hostname should be a DNS CNAME to the machine's IP. When asked (by `init.sh`) to  configure nginx to redirect http requests to a Jitsi virtual host, reply '**Y**es'.
 
 2. Run the init script:
 
@@ -105,10 +123,12 @@ Before starting services, we need to create the configuration files for the serv
  ./init.sh
 ```
 
+The first time you run the script, you will want to answer **Y**es to all questions.
+
 The init script will generate configuration files (from the templates in [conf/templates](conf/templates)) for the services using the hostname and email configured in [init.env](init.env), and attempt to create certificates using letsencrypt. **If letsencrypt fails, it will create a self-signed certificate that can be used for testing purposes**.
 
-* Note: you might need to execute ```sudo  ./init.sh``` if [your user does not have permissions to access the docker service](https://docs.docker.com/engine/install/linux-postinstall/).
-* Note: The file ```init.env``` is used only the first time you run ```init.sh```; its contents are copied to ```.env``` after the first run, and ```.env``` is the file used at runtime.
+> You might need to execute ```sudo  ./init.sh``` if [your user does not have permissions to access the docker service](https://docs.docker.com/engine/install/linux-postinstall/).
+> The file ```init.env``` is used only the first time you run ```init.sh```; its contents are copied to ```.env``` after the first run, and ```.env``` is the file used at runtime.
 
 3. Start all services:
 
@@ -127,8 +147,8 @@ The init script will generate configuration files (from the templates in [conf/t
  ./dev.sh up -d
 ```
 
-* Note: you might need to execute the above commands with ```sudo``` (e.g. ```sudo ./prod.sh up```) if [your user does not have permissions to access the docker service](https://docs.docker.com/engine/install/linux-postinstall/).
-* See [utility scripts](utility-scripts) for details.
+> You might need to execute the above commands with ```sudo``` (e.g. ```sudo ./prod.sh up```) if [your user does not have permissions to access the docker service](https://docs.docker.com/engine/install/linux-postinstall/).
+> See [utility scripts](utility-scripts) for details.
 
 ## File Store
 
@@ -152,8 +172,8 @@ After updating the submodules, to have the updates of built containers (persist,
 ```
 
 * Use ```prod.sh```, ```staging.sh``` or ```dev.sh``` depending on which configuration you want to use.
-* Note: you might need to execute the above commands with ```sudo``` if [your user does not have permissions to access the docker service](https://docs.docker.com/engine/install/linux-postinstall/).
-* See [utility scripts](utility-scripts) for the description of these commands.
+> You might need to execute the above commands with ```sudo``` if [your user does not have permissions to access the docker service](https://docs.docker.com/engine/install/linux-postinstall/).
+> See [utility scripts](utility-scripts) for the description of these commands.
 
 ## Files/Folders Description
 
@@ -192,7 +212,7 @@ Call the script by passing any ```docker-compose``` subcommands (such as ```up``
 * ```./dev.sh up```
 * ...
 
-**NOTE**: *You might need to execute the scripts with ```sudo``` if [your user does not have permissions to access the docker service](https://docs.docker.com/engine/install/linux-postinstall/)*.
+> *You might need to execute the scripts with ```sudo``` if [your user does not have permissions to access the docker service](https://docs.docker.com/engine/install/linux-postinstall/)*.
 
 ### Script Arguments Quick Reference
 
@@ -221,3 +241,4 @@ The utility scripts pass the arguments to **docker-compose**. You can use them w
 **See logs**
 
 - ```[/prod.sh | d/ev.sh | ./staging.sh] logs```
+

@@ -17,7 +17,6 @@ services:
       - arts-static-content:/usr/share/nginx/html/arts:ro # serve arts static files
       - account-static-content:/usr/share/nginx/html/user/static:ro # serve account static files
       - ../dev:/usr/share/nginx/html/dev:ro # mount dev folder
-      - ../dev/mqtt-west:/usr/share/nginx/html/mqtt-west:ro # mount mqtt-west folder
     ports:
       - "80:80" # map port 80 on the host to port 80 on the container
       - "443:443"
@@ -60,7 +59,7 @@ services:
     image: conixcenter/arena-broker # pulls from https://hub.docker.com/repository/docker/conixcenter/arena-broker
     volumes:
       - ./conf/mosquitto-br-conn.conf:/mosquitto/config/mosquitto.conf:ro # mount local config file to /mosquitto/config/mosquitto.conf in the container
-      - ./data/keys/pubsubkey.der:/pubsubkey.der:ro # pubsub key available to service
+      - ./data/keys/jwt.public.der:/pubsubkey.der:ro # pubsub key available to service
       - ./data/certbot/conf:/etc/letsencrypt:ro # mount certs volume (see conf/mosquitto.conf to see how the files are used)
     depends_on:
       - mqtt
