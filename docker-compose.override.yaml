@@ -55,6 +55,7 @@ services:
       - account-static-content:/usr/src/app/static # static content
       - ./data/keys/pubsubkey.pem:/home/node/app/pubsubkey.pem:ro # pubsub key available to service
       - ./data/account:/usr/src/app/db # account db
+    tty: true
     env_file:
       - .env
       - secret.env
@@ -89,6 +90,7 @@ services:
     volumes:
       - ./conf/arts-settings.py:/usr/src/app/arts_api/settings.py:ro
       - arts-static-content:/usr/src/app/public # static arts visualization page
+    tty: true
     env_file:
       - secret.env
     command:
