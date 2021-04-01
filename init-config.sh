@@ -133,7 +133,7 @@ EOF
         cat $TMPFN >> ./conf/arena-web.conf
         cat $TMPFN >> ./conf/arena-web-staging.conf
         rm $TMPFN
-done
+fi
 
 # add server block to redirect jitsi requests
 if [[ ! -z "$JITSI_HOSTNAME" ]]; then
