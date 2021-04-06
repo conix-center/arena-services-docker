@@ -34,10 +34,12 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   openssl rsa -in ./data/keys/jwt.priv.pem -RSAPublicKey_out -outform DER -out ./data/keys/jwt.public.der # mqtt auth plugin requires RSAPublicKey format
   # change ownership public keys
   chown $OWNER ./data/keys/jwt.public*
-  # copy public key to /conf/sha256(hostname).pem to be used for Atlassian Service Authentication Protocol (ASAP)
-  PUB_KEY_FILENAME=$(echo -n $HOSTNAME | shasum -a 256).pem
-  echo ./data/keys/jwt.public.pem > ./conf/arena-web-conf/$PUB_KEY_FILENAME
 fi
+
+rm ./conf/arena-web-conf/*.pem
+# copy public key to /conf/sha256(hostname).pem to be used for Atlassian Service Authentication Protocol (ASAP)
+HOSTSHA256=$(echo -n $HOSTNAME | shasum -a 256)
+cat ./data/keys/jwt.public.pem > ./conf/arena-web-conf/${HOSTSHA256%???}.pem
 
 echo -e "\n### Creating Service Tokens. This will replace service tokens in secret.env (if exists; backup will be in secret.env.bak)."
 read -p "Create Service Tokens ? (y/N) " -r
@@ -72,6 +74,13 @@ fi
 # setup escape var for envsubst templates
 export ESC="$"
 
+# create a list of hostnames for python config files
+HOSTNAMES_LIST=""
+for host in $(echo "$HOSTNAME $ADDITIONAL_HOSTNAMES"|tr ' ' '\n'); do
+  HOSTNAMES_LIST="$HOSTNAMES_LIST '$host',"
+done
+export HOSTNAMES_LIST=${HOSTNAMES_LIST::-1} # remove last comma
+
 for t in $(find conf-templates/ -type f)
 do
   t="${t:15}" # remove "conf-templates/"
@@ -86,20 +95,63 @@ do
   chown $OWNER conf/$f
 done
 
+# add server block to redirect additional hostnames
+if [[ ! -z "$ADDITIONAL_HOSTNAMES" ]]; then
+        TMPFN=/tmp/nginx_tmpcfg
+        cat > $TMPFN <<  EOF
+
+server {
+    server_name         $ADDITIONAL_HOSTNAMES;
+    server_tokens off;
+    client_max_body_size 1000M;
+
+    listen              443 ssl;
+    ssl_certificate     /etc/letsencrypt/live/arenaxr.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/arenaxr.org/privkey.pem;
+    include             /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
+
+    location ^~ /user/ {
+        add_header 'Access-Control-Allow-Origin' "$http_origin";
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, DELETE, PUT';
+        add_header 'Access-Control-Allow-Credentials' 'true';
+        add_header 'Access-Control-Allow-Headers' 'User-Agent,Keep-Alive,Content-Type';
+        proxy_pass http://arena-account:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_read_timeout 86400;
+    }
+
+    location / {
+        return 301 https://$HOSTNAME$request_uri;
+    }
+}
+EOF
+        # add server block to production and staging
+        cat $TMPFN >> ./conf/arena-web.conf
+        cat $TMPFN >> ./conf/arena-web-staging.conf
+        rm $TMPFN
+fi
+
+# add server block to redirect jitsi requests
 if [[ ! -z "$JITSI_HOSTNAME" ]]; then
     echo -e "\n### If you are going to setup a Jitsi server on this machine, you will configure nginx to redirect http requests to a Jitsi virtual host (JITSI_HOSTNAME is an alias to the IP of the machine)."
     read -p "Add server block to redirect requests to Jitsi ? (y/N) " -r
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        TMPFN=/tmp/$(openssl rand -base64 12)
+        TMPFN=/tmp/nginx_tmpcfg
+        JITSI_HOSTNAME_NOPORT=$(echo $JITSI_HOSTNAME | cut -f1 -d":")
         cat > $TMPFN <<  EOF
+
 server {
-    server_name         $JITSI_HOSTNAME;
+    server_name         $JITSI_HOSTNAME_NOPORT;
     listen              80;
     location /.well-known/acme-challenge/ {  
-        proxy_pass http://$JITSI_HOSTNAME:8000;       
+        proxy_pass http://$JITSI_HOSTNAME_NOPORT:8000;
     }    
     location / {  
-        rewrite ^ https://$JITSI_HOSTNAME:8443$request_uri? permanent;
+        return 301 https://$JITSI_HOSTNAME$request_uri;
     }    
 }
 EOF

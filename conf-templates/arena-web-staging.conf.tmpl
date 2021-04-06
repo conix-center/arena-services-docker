@@ -11,10 +11,6 @@ server {
     include             /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
 
-    location = / {  
-        return 301 "/user";
-    }
-
     location = /robots.txt {
         add_header  Content-Type  text/plain;
         return 200 "User-agent: *\nDisallow: /\n";
@@ -103,7 +99,7 @@ server {
 
     location ~* / {
         root /usr/share/nginx/html;
-        index index.html index.html;
+        index landing.html index.html;
         disable_symlinks off;
 
         add_header 'Access-Control-Allow-Origin' '*';

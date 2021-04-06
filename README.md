@@ -34,6 +34,7 @@ HOSTNAME=full.domain.name.of.your.host
 JITSI_HOSTNAME=full.domain.name.of.your.jitsi.host
 EMAIL=nouser@nomail.com
 BACKUP_USER=1001:1001
+ARENA_DOCKER_REPO_FOLDER=full.path.to.repo.folder
 GAUTH_CLIENTID=Google_OAuth_Web_Client_ID
 GAUTH_CLIENTSECRET=Google_OAuth_Web_Client_Secret
 GAUTH_INSTALLED_CLIENTID=Google_OAuth_Installed_Client_ID
@@ -48,6 +49,8 @@ DJANGO_SUPERUSER_EMAIL=admin@example.com
 * ```EMAIL``` is the email used to get the certificates with [letsencrypt](https://letsencrypt.org/).
 
 * ```BACKUP_USER``` is the ```user:group``` of the *host machine user* that needs to access files backed up by the backup container.
+
+* ```ARENA_DOCKER_REPO_FOLDER``` is the full path to the the location of this repository e.g. ```/home/user/arena-services-docker```.
 
 * ```ACCOUNT_SU_NAME``` and ```ACCOUNT_SU_EMAIL``` are the account admin user and email.
 

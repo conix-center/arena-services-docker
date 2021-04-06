@@ -1,7 +1,7 @@
 # we produce the final config file by passing this file through envsubst (will substitute env variables like ${HOSTNAME}, ...)
 # IMPORTANT: to avoid substitution on nginx variables, use '${ESC}' on the their '$' signs
 server {
-    server_name         ${HOSTNAME};
+    server_name         ${HOSTNAME} ${ADDITIONAL_HOSTNAMES};
     server_tokens off;
     client_max_body_size 1000M;
 
@@ -10,10 +10,6 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/${HOSTNAME}/privkey.pem;
     include             /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
-
-    location = / {
-        return 301 "/user";
-    }
 
     location = /robots.txt {
         add_header  Content-Type  text/plain;
@@ -91,7 +87,7 @@ server {
 
     location ~* / {
         root /usr/share/nginx/html;
-        index index.html index.html;
+        index landing.html index.html;
         disable_symlinks off;
 
         add_header 'Access-Control-Allow-Origin' '*';
