@@ -1,6 +1,10 @@
 #!/bin/bash
 
-domains="$HOSTNAME $ADDITIONAL_HOSTNAMES" # space-separated list of domains
+if [[ ! -z "$ADDITIONAL_HOSTNAMES" ]]; then
+  domains="$HOSTNAME $ADDITIONAL_HOSTNAMES" # space-separated list of domains
+else
+  domains="$HOSTNAME" # space-separated list of domains
+fi
 rsa_key_size=4096
 email=$EMAIL # Adding a valid address is strongly recommended
 staging_arg="" # Set to "--staging" if you're testing your setup to avoid hitting request limits
@@ -22,7 +26,7 @@ local="${HOSTNAME##*.}"
 # if setting up a "localhost" or ".local" domain, just create a self-signed certificate
 if [ $HOSTNAME = "localhost" ] || [ $local = "local" ]; then
   echo "### Creating self-signed certificate for $domains"
-  path="/etc/letsencrypt/live/$domains"
+  path=$(echo "/etc/letsencrypt/live/$domains" | sed 's/ *$//')
   mkdir -p $path
   openssl req -x509 -nodes -newkey rsa:$rsa_key_size\
       -keyout "$path/privkey.pem" \
@@ -49,14 +53,14 @@ certbot certonly --standalone -w /var/www/certbot \
     $email_arg \
     $domain_args \
     --rsa-key-size $rsa_key_size \
-    --agree-tos 
-    
+    --agree-tos
+
 if [ $? -ne 0 ]
 then
   echo
   echo "### !!! Could not create certificate. Certbot failed (see errors above) !!! ###"
   echo "### !!! Creating self-signed certificate for $domains !!! ###"
-  path="/etc/letsencrypt/live/$domains"
+  path=$(echo "/etc/letsencrypt/live/$domains" | sed 's/ *$//')
   mkdir -p $path
   openssl req -x509 -nodes -newkey rsa:$rsa_key_size\
       -keyout "$path/privkey.pem" \

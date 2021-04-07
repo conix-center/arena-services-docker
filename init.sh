@@ -1,7 +1,5 @@
 #!/bin/bash
 
-touch secret.env
-
 if [ ! -f .env ]
 then
   cp init.env .env
