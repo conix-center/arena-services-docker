@@ -123,7 +123,7 @@ server {
     ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
 
     location ^~ /user/ {
-        add_header 'Access-Control-Allow-Origin' "$http_origin";
+        add_header 'Access-Control-Allow-Origin' "\$http_origin";
         add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, DELETE, PUT';
         add_header 'Access-Control-Allow-Credentials' 'true';
         add_header 'Access-Control-Allow-Headers' 'User-Agent,Keep-Alive,Content-Type';
@@ -136,7 +136,7 @@ server {
     }
 
     location / {
-        return 301 https://$HOSTNAME$request_uri;
+        return 301 https://$HOSTNAME\$request_uri;
     }
 }
 EOF
@@ -162,7 +162,7 @@ server {
         proxy_pass http://$JITSI_HOSTNAME_NOPORT:8000;
     }    
     location / {  
-        return 301 https://$JITSI_HOSTNAME$request_uri;
+        return 301 https://$JITSI_HOSTNAME\$request_uri;
     }    
 }
 EOF

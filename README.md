@@ -44,7 +44,7 @@ DJANGO_SUPERUSER_EMAIL=admin@example.com
 ```
 * ```HOSTNAME``` is the fully qualified domain name (FQDN) of your host. If you don't have a FQDN, you can do a local setup; see [Init Config](#init-config).
 
-* ```JITSI_HOSTNAME``` is the fully qualified domain name (FQDN) of the jitsi server you will use. 
+* ```JITSI_HOSTNAME``` is the fully qualified domain name (FQDN) of the jitsi server you will use.
 
 * ```EMAIL``` is the email used to get the certificates with [letsencrypt](https://letsencrypt.org/).
 
@@ -56,7 +56,7 @@ DJANGO_SUPERUSER_EMAIL=admin@example.com
 
 > The file ```init.env``` is used only the first time you run ```init.sh```; its contents are copied to ```.env``` after the first run, and ```.env``` is the file used at runtime.
 
-> If you are setting up a jitsi server in the same machine, see [Init Config](#init-config) for details. 
+> If you are setting up a jitsi server in the same machine, see [Init Config](#init-config) for details.
 
 4. Run init script:
 
@@ -89,7 +89,7 @@ DJANGO_SUPERUSER_EMAIL=admin@example.com
 ### Assumptions:
 
 * **init.sh, prod.sh, dev.sh, staging.sh:** assume a bash shell
-* **backup user:**  The ```backup``` container tries to change to the owner of the files backed up to a user indicated in [.env](.env). This is the ```user:group``` of the *host machine user* that you want to have access to the files backed up by this container.
+* **backup user:**  The ```backup``` container tries to change to the owner of the files backed up to a user indicated in `.env`. This is the ```user:group``` of the *host machine user* that you want to have access to the files backed up by this container.
 * **OAuth:** You will need to set up [Google Web OAuth for your domain](https://developers.google.com/identity/protocols/oauth2/web-server) for the ARENA web client as well as [Google Limited-Input OAuth](https://developers.google.com/identity/protocols/oauth2/limited-input-device) for the ARENA Python client. Detailed instructions are available at our [arena-account repo](https://github.com/conix-center/arena-account).
 
 ## Init Config
@@ -107,13 +107,13 @@ Before starting services, we need to create the configuration files for the serv
 > ```bash
 > HOSTNAME=localhost
 > ```
-> This will result in creating a self-signed certificate to be used with the services. This is the name you will enter in your browser: [https://localhost](https:///localhost)
-> **Make sure the above name resolves in your system (by adding it to [the ```hosts file```](https://linuxize.com/post/how-to-edit-your-hosts-file/))**.
+> This will result in creating a self-signed certificate to be used with the services. This is the name you will enter in your browser: `https://localhost`
 >
+> * **Make sure the above name resolves in your system (by adding it to [the `hosts` file](https://en.wikipedia.org/wiki/Hosts_(file))**.
 > * Note: The file ```init.env``` is used only the first time you run ```init.sh```; its contents are copied to ```.env``` after the first run, and ```.env``` is the file used at runtime.
 
 > ### Setup (public) jitsi in the same machine
-> 
+>
 > If you are going to setup a jitsi instance in the same machine, add the jitsi hostname to `.env`:
 > ```
 > JITSI_HOSTNAME=<jitsi-hostname>
@@ -128,7 +128,7 @@ Before starting services, we need to create the configuration files for the serv
 
 The first time you run the script, you will want to answer **Y**es to all questions.
 
-The init script will generate configuration files (from the templates in [conf/templates](conf/templates)) for the services using the hostname and email configured in [init.env](init.env), and attempt to create certificates using letsencrypt. **If letsencrypt fails, it will create a self-signed certificate that can be used for testing purposes**.
+The init script will generate configuration files (from the templates in [conf-templates](conf-templates)) for the services using the hostname and email configured in [init.env](init.env), and attempt to create certificates using letsencrypt. **If letsencrypt fails, it will create a self-signed certificate that can be used for testing purposes**.
 
 > You might need to execute ```sudo  ./init.sh``` if [your user does not have permissions to access the docker service](https://docs.docker.com/engine/install/linux-postinstall/).
 > The file ```init.env``` is used only the first time you run ```init.sh```; its contents are copied to ```.env``` after the first run, and ```.env``` is the file used at runtime.
@@ -151,7 +151,7 @@ The init script will generate configuration files (from the templates in [conf/t
 ```
 
 > You might need to execute the above commands with ```sudo``` (e.g. ```sudo ./prod.sh up```) if [your user does not have permissions to access the docker service](https://docs.docker.com/engine/install/linux-postinstall/).
-> See [utility scripts](utility-scripts) for details.
+> See [utility scripts](#utility-scripts) for details.
 
 ## File Store
 
@@ -176,7 +176,7 @@ After updating the submodules, to have the updates of built containers (persist,
 
 * Use ```prod.sh```, ```staging.sh``` or ```dev.sh``` depending on which configuration you want to use.
 > You might need to execute the above commands with ```sudo``` if [your user does not have permissions to access the docker service](https://docs.docker.com/engine/install/linux-postinstall/).
-> See [utility scripts](utility-scripts) for the description of these commands.
+> See [utility scripts](#utility-scripts) for the description of these commands.
 
 ## Files/Folders Description
 
@@ -199,12 +199,12 @@ After updating the submodules, to have the updates of built containers (persist,
 * **docker-compose.prod.yaml:** Compose file that describes production services. Relies on the base config in ```docker-compose.yaml``` to create the final production config.
 * **docker-compose.staging.yaml:** Compose file that describes adds a dev folder on the web server. Relies on the base config in ```docker-compose.yaml``` to create the final staging config.
 * **init-letsencrypt.sh:** Initialize certbot. Called by **init.sh**.
-* **init.sh:** Initialize config files. See [Init Config](init-config) Section.
-* **update-submodules.sh:** Run this to get the latest updates from the repositories added as submodules (**ARENA-core**, **arena-persist**). You will need to restart the services to have the changes live (see [Update Submodules](update-submodules)).
+* **init.sh:** Initialize config files. See [Init Config](#init-config) Section.
+* **update-submodules.sh:** Run this to get the latest updates from the repositories added as submodules (**ARENA-core**, **arena-persist**). You will need to restart the services to have the changes live (see [Update Submodules](#update-submodules)).
 
 ## Utility Scripts
 
-You can use the ```prod.sh```, ```dev.sh``` and  ```staging.sh``` utility scripts (with a bash shell). These scripts call ```docker-compose``` with the right compose config files, where some files [extend each other]((https://docs.docker.com/compose/extends/)). The docker compose config files are used as follows:
+You can use the ```prod.sh```, ```dev.sh``` and  ```staging.sh``` utility scripts (with a bash shell). These scripts call ```docker-compose``` with the right compose config files, where some files [extend each other](https://docs.docker.com/compose/extends/). The docker compose config files are used as follows:
 * **prod.sh**: ```docker-compose.yaml``` and ```docker-compose.prod.yaml```
 * **staging.sh**: ```docker-compose.yaml``` and ```docker-compose.staging.yaml```
 * **dev.sh**: ```docker-compose.override.yaml```
