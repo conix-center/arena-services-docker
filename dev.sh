@@ -10,7 +10,7 @@ cp ./conf/arena-web-conf/arena-defaults-dev.js ./conf/arena-web-conf/defaults.js
 # force static volumes to be created again on "up"
 if [[ "$*" == *up* ]]
 then
-    docker volume rm arena-services-docker_arts-static-content
+    #docker volume rm arena-services-docker_arts-static-content
     docker volume rm arena-services-docker_account-static-content
 fi
 

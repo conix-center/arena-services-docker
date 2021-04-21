@@ -15,7 +15,7 @@ services:
       - ./conf/arena-web.conf:/etc/nginx/conf.d/arena-web.conf:ro # mount nginx config
       - ./ARENA-core:/usr/share/nginx/html:ro # mount root html from ./ARENA-core
       - ./conf/arena-web-conf:/usr/share/nginx/html/conf # arena client code conf
-      - arts-static-content:/usr/share/nginx/html/arts:ro # serve arts static files
+      #- arts-static-content:/usr/share/nginx/html/arts:ro # serve arts static files
       - account-static-content:/usr/share/nginx/html/user/static:ro # serve account static files
     ports:
       - "80:80" # map port 80 on the host to port 80 on the container
@@ -85,7 +85,7 @@ services:
 
   arts:
     volumes:
-      - arts-static-content:/usr/src/app/public:ro # static arts visualization page
+      #- arts-static-content:/usr/src/app/public:ro # static arts visualization page
     env_file: secret.env
     restart: unless-stopped # service will respawn unless we tell docker to stop it
 
@@ -134,5 +134,5 @@ services:
     restart: unless-stopped
 
 volumes:
-  arts-static-content:
+  #arts-static-content:
   account-static-content:

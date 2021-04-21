@@ -14,7 +14,7 @@ services:
       - ./conf/arena-web-dev.conf:/etc/nginx/conf.d/arena-web.conf:ro # mount nginx config
       - ./ARENA-core:/usr/share/nginx/html:ro # mount root html from ./ARENA-core
       - ./conf/arena-web-conf:/usr/share/nginx/html/conf:ro # arena client code conf
-      - arts-static-content:/usr/share/nginx/html/arts:ro # serve arts static files
+      #- arts-static-content:/usr/share/nginx/html/arts:ro # serve arts static files
       - ./data/certbot/conf:/etc/letsencrypt:ro # mount certbot files (used in conf/nginx-conf.d/arena-web.conf)
       - ./data/certbot/www:/var/www/certbot:ro # mount certbot files (used in conf/nginx-conf.d/arena-web.conf)
       - account-static-content:/usr/share/nginx/account-static:ro # serve account static files
@@ -89,7 +89,7 @@ services:
     build: "arts/arts-main"
     volumes:
       - ./conf/arts-settings.py:/usr/src/app/arts_api/settings.py:ro
-      - arts-static-content:/usr/src/app/public # static arts visualization page
+      #- arts-static-content:/usr/src/app/public # static arts visualization page
     tty: true
     env_file:
       - secret.env
@@ -117,5 +117,5 @@ services:
       - arts
 
 volumes:
-  arts-static-content:
+  # arts-static-content:
   account-static-content:
