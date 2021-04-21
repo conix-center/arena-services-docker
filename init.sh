@@ -7,10 +7,9 @@ fi
 
 # TMP: create ARENA-core/user/static
 [ ! -d "ARENA-core/user/static" ] && mkdir -p ARENA-core/user/static
-[ ! -d "ARENA-core/arts" ] && mkdir -p ARENA-core/arts
 
 # build arena-core js
-./build-arena-core.sh 
+./build-arena-core.sh
 
 echo -e "\n\e[1m### Init config files (create secrets.env, ./conf/* files, and ./data/* folders)\e[0m\n"
 docker run -it --env-file .env --env-file secret.env -e OWNER=`id -u`:`id -g` --rm -v $PWD:/work -w /work conixcenter/arena-services-docker-init-utils /work/init-config.sh

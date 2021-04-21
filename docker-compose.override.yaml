@@ -5,9 +5,10 @@
 #
 # NOTE: if -f is not given, 'docker-compose up' will use docker-compose.override.yaml (https://docs.docker.com/compose/extends/)
 
-version: "3"
+version: '3'
 
 services:
+
   arena-web: # create a container named "arena-web"; other service containers in this file can resolve its name (arena-web)
     image: "nginx" # creates container from nginx
     volumes:
@@ -21,7 +22,7 @@ services:
     ports:
       - "80:80" # map port 80 on the host to port 80 on the container
       - "443:443"
-    command: '/bin/sh -c ''while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"''' # reload certificates every 6h
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'" # reload certificates every 6h
     depends_on:
       - mqtt
       - arena-persist
@@ -79,7 +80,7 @@ services:
       - 8883:8883/tcp # mqtt-tls
 
   store:
-    image: "conixcenter/arena-store" # pulls from https://hub.docker.com/repository/docker/conixcenter/arena-store
+    image: "conixcenter/arena-store"  # pulls from https://hub.docker.com/repository/docker/conixcenter/arena-store
     volumes:
       - ./conf/arena-store-config.json:/arena-store/.config.json:ro
       - ./ARENA-core/store:/srv-files:rw
@@ -93,19 +94,9 @@ services:
     tty: true
     env_file:
       - secret.env
-    command:
-      [
-        "./wait-for-it.sh",
-        "mqtt:1883",
-        "--",
-        "python",
-        "manage.py",
-        "runserver",
-        "0.0.0.0:8000",
-      ]
+    command: ["./wait-for-it.sh", "mqtt:1883", "--", "python", "manage.py", "runserver", "0.0.0.0:8000"]
     depends_on:
-      - mqtt
-    depends_on:
+      #- mqtt
       mqtt:
         condition: service_healthy
 
