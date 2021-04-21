@@ -84,7 +84,7 @@ services:
     restart: unless-stopped # service will respawn unless we tell docker to stop it
 
   arts:
-    volumes:
+    #volumes:
       #- arts-static-content:/usr/src/app/public:ro # static arts visualization page
     env_file: secret.env
     restart: unless-stopped # service will respawn unless we tell docker to stop it
